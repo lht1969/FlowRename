@@ -1,0 +1,217 @@
+/* AdRename - Global Styles & Theme System */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==================== Custom Theme Tokens ==================== */
+/* These CSS custom properties extend Skeleton UI's theme system */
+/* and provide application-specific design tokens */
+
+:root {
+  /* Brand Colors - AdRename Identity */
+  --adr-brand: #3b82f6;
+  --adr-brand-light: #60a5fa;
+  --adr-brand-dark: #2563eb;
+  --adr-accent: #f59e0b;
+  --adr-accent-light: #fbbf24;
+  --adr-success: #10b981;
+  --adr-warning: #f59e0b;
+  --adr-error: #ef4444;
+  --adr-info: #06b6d4;
+
+  /* Layout Spacing */
+  --adr-sidebar-width: 280px;
+  --adr-panel-width: 320px;
+  --adr-header-height: 48px;
+  --adr-statusbar-height: 28px;
+  --adr-gap: 1px;
+
+  /* Typography */
+  --adr-font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code", monospace;
+  --adr-font-sans: "Inter Variable", "Segoe UI", system-ui, sans-serif;
+
+  /* Transitions */
+  --adr-transition-fast: 120ms ease;
+  --adr-transition-normal: 200ms ease;
+  --adr-transition-slow: 350ms ease;
+
+  /* Z-Index Layers */
+  --adr-z-base: 0;
+  --adr-z-panel: 10;
+  --adr-z-header: 20;
+  --adr-z-modal: 100;
+  --adr-z-toast: 200;
+}
+
+/* ==================== Dark Theme Overrides ==================== */
+[data-theme="skeleton"],
+[data-theme="modern"],
+[data-theme="wintry"],
+[data-theme="rocket"],
+[data-theme="seafoam"],
+[data-theme="vintage"],
+[data-theme="crimson"],
+[data-theme="obsidian"],
+[data-theme="aurora"] {
+  /* Dark themes get subtle grid pattern background */
+  --adr-bg-pattern: radial-gradient(
+    circle at 1px 1px,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 0
+  );
+  --adr-bg-pattern-size: 24px 24px;
+}
+
+/* ==================== Light Theme Overrides ==================== */
+[data-theme="skeleton"]:not([data-mode="dark"]),
+[data-theme="modern"]:not([data-mode="dark"]) {
+  --adr-bg-pattern: radial-gradient(
+    circle at 1px 1px,
+    rgba(0, 0, 0, 0.04) 1px,
+    transparent 0
+  );
+  --adr-bg-pattern-size: 24px 24px;
+}
+
+/* ==================== Base Reset ==================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--adr-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent text selection on UI elements (allow on content) */
+header,
+nav,
+aside,
+.toolbar {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ==================== Scrollbar Styling ==================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.5);
+}
+
+/* ==================== Utility Classes ==================== */
+.adr-mono {
+  font-family: var(--adr-font-mono);
+}
+
+.adr-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adr-no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* File status color indicators */
+.adr-status-pending {
+  color: var(--adr-info);
+}
+.adr-status-success {
+  color: var(--adr-success);
+}
+.adr-status-error {
+  color: var(--adr-error);
+}
+.adr-status-conflict {
+  color: var(--adr-warning);
+}
+.adr-status-skipped {
+  color: rgba(128, 128, 128, 0.6);
+}
+
+/* Conflict highlight animation */
+@keyframes adr-pulse-warning {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(245, 158, 11, 0.15);
+  }
+}
+
+.adr-conflict-row {
+  animation: adr-pulse-warning 2s ease-in-out infinite;
+}
+
+/* Drag-and-drop zone styling */
+.adr-drop-zone {
+  border: 2px dashed rgba(128, 128, 128, 0.3);
+  border-radius: 8px;
+  transition: var(--adr-transition-normal);
+}
+
+.adr-drop-zone.active {
+  border-color: var(--adr-brand);
+  background-color: rgba(59, 130, 246, 0.08);
+}
+
+/* Smooth page transitions */
+@keyframes adr-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.adr-animate-in {
+  animation: adr-fade-in var(--adr-transition-normal) forwards;
+}
+
+/* ==================== Theme-Specific Active Button Contrast Fix ==================== */
+/* 现代主题和冬季主题下选中按钮的对比度修复，确保文字清晰可读 */
+
+/* Modern 主题 - 选中按钮使用白色文字以确保对比度 */
+[data-theme='modern'] .bg-blue-500\/30.text-blue-300,
+[data-theme='modern'] .bg-pink-500\/30.text-pink-300 {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Wintry 主题 - 选中按钮使用白色文字以确保对比度 */
+[data-theme='wintry'] .bg-blue-500\/30.text-blue-300 {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Obsidian 主题 - 同上 */
+[data-theme='obsidian'] .bg-blue-500\/30.text-blue-300 {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}

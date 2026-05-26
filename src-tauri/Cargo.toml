@@ -1,0 +1,61 @@
+[package]
+name = "adrename"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Use workspace dependencies
+tauri = { workspace = true }
+tauri-plugin-shell = { workspace = true }
+tauri-plugin-dialog = "2"
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+regex = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+walkdir = { workspace = true }
+log = { workspace = true }
+env_logger = { workspace = true }
+
+# Image metadata (EXIF)
+kamadak-exif = { workspace = true }
+
+# Audio metadata (ID3)
+id3 = { workspace = true }
+
+# App directories (data, config, cache)
+dirs = "5"
+
+[dev-dependencies]
+tempfile = "3"
+# criterion = "0.5"  # Will be added when benchmarks are implemented
+
+[[test]]
+name = "models_test"
+path = "tests/unit/models_test.rs"
+
+[[test]]
+name = "scanner_test"
+path = "tests/unit/scanner_test.rs"
+
+[[test]]
+name = "pipeline_test"
+path = "tests/unit/pipeline_test.rs"
+
+[[test]]
+name = "p0_methods_test"
+path = "tests/unit/p0_methods_test.rs"
+
+[[test]]
+name = "tag_system_test"
+path = "tests/unit/tag_system_test.rs"
+
+[[test]]
+name = "tauri_commands_test"
+path = "tests/unit/tauri_commands_test.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }

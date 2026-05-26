@@ -1,0 +1,755 @@
+use anyhow::{bail, Result};
+use regex::Regex;
+
+use crate::method_engine::traits::{Method, MethodContext};
+use crate::models::{
+    ApplyToOption, CaseType, MethodConfig, MethodType,
+    OccurrenceOption, RemovePosition, ReplaceConfig, AddConfig, RemoveConfig,
+    NewCaseConfig, NewNameConfig, AddPosition,
+};
+
+// ==================== HELPER FUNCTIONS ====================
+
+/// Split a full filename into name part and extension part
+/// Uses the original extension from context to correctly handle multi-dot extensions
+fn split_name_ext(input: &str, original_ext: &str) -> (String, String) {
+    let ext_stripped = original_ext.trim_start_matches('.');
+    if ext_stripped.is_empty() {
+        return (input.to_string(), String::new());
+    }
+    if let Some(dot_pos) = input.rfind(&format!(".{}", ext_stripped)) {
+        let (name, ext) = input.split_at(dot_pos);
+        (name.to_string(), ext.to_string())
+    } else {
+        (input.to_string(), String::new())
+    }
+}
+
+/// Insert text at a specific character position (handles Unicode correctly)
+fn insert_at_pos(input: &str, text: &str, pos: usize) -> String {
+    let chars: Vec<char> = input.chars().collect();
+    let len = chars.len();
+    let actual_pos = pos.min(len);
+    if actual_pos == 0 {
+        format!("{}{}", text, input)
+    } else if actual_pos >= len {
+        format!("{}{}", input, text)
+    } else {
+        let mut result = chars[..actual_pos].to_vec();
+        result.extend(text.chars());
+        result.extend_from_slice(&chars[actual_pos..]);
+        result.into_iter().collect()
+    }
+}
+
+/// Insert text at the end of the input (handles backwards position for Add method)
+fn insert_at_end(input: &str, text: &str) -> String {
+    format!("{}{}", input, text)
+}
+
+// ==================== REPLACE METHOD ====================
+
+/// Replace method - finds and replaces text patterns in filenames
+/// Supports plain text and regular expressions with various occurrence options
+#[derive(Debug)]
+pub struct ReplaceMethod {
+    config: ReplaceConfig,
+}
+
+impl ReplaceMethod {
+    /// Create a new Replace method with the given configuration
+    pub fn new(config: ReplaceConfig) -> Self {
+        Self { config }
+    }
+
+    /// Apply replacement logic to a target string (name part, extension part, or full name)
+    fn apply_to_target(&self, target: &str) -> Result<String> {
+        if self.config.use_regex {
+            let flags = if self.config.case_sensitive { "" } else { "(?i)" };
+            let pattern = format!("{}{}", flags, self.config.find);
+            let re = Regex::new(&pattern).map_err(|e| {
+                anyhow::anyhow!("Invalid regex pattern '{}': {}", self.config.find, e)
+            })?;
+
+            match &self.config.occurrence {
+                OccurrenceOption::All => Ok(re.replace_all(target, &self.config.replace_with).to_string()),
+                OccurrenceOption::First => Ok(re.replace(target, &self.config.replace_with).to_string()),
+                OccurrenceOption::Last => {
+                    let matches: Vec<_> = re.find_iter(target).collect();
+                    if let Some(last_match) = matches.last() {
+                        let before = &target[..last_match.start()];
+                        let after = &target[last_match.end()..];
+                        Ok(format!("{}{}{}", before, self.config.replace_with, after))
+                    } else {
+                        Ok(target.to_string())
+                    }
+                }
+                OccurrenceOption::Custom(n) => {
+                    let mut count = 0;
+                    for m in re.find_iter(target) {
+                        count += 1;
+                        if count == *n {
+                            let before = &target[..m.start()];
+                            let after = &target[m.end()..];
+                            return Ok(format!("{}{}{}", before, self.config.replace_with, after));
+                        }
+                    }
+                    Ok(target.to_string())
+                }
+            }
+        } else {
+            let find = &self.config.find;
+            let replace_with = &self.config.replace_with;
+
+            match &self.config.occurrence {
+                OccurrenceOption::All => {
+                    if self.config.case_sensitive {
+                        Ok(target.replace(find, replace_with))
+                    } else {
+                        let mut result = target.to_string();
+                        let mut offset = 0;
+                        while let Some(pos) = result[offset..].to_lowercase().find(&find.to_lowercase()) {
+                            let actual_pos = offset + pos;
+                            result.replace_range(actual_pos..actual_pos + find.len(), replace_with);
+                            offset = actual_pos + replace_with.len();
+                        }
+                        Ok(result)
+                    }
+                }
+                OccurrenceOption::First => {
+                    let pos = if self.config.case_sensitive {
+                        target.find(find)
+                    } else {
+                        target.to_lowercase().find(&find.to_lowercase())
+                    };
+                    if let Some(pos) = pos {
+                        let mut result = target.to_string();
+                        result.replace_range(pos..pos + find.len(), replace_with);
+                        Ok(result)
+                    } else {
+                        Ok(target.to_string())
+                    }
+                }
+                OccurrenceOption::Last => {
+                    let pos = if self.config.case_sensitive {
+                        target.rfind(find)
+                    } else {
+                        target.to_lowercase().rfind(&find.to_lowercase())
+                    };
+                    if let Some(pos) = pos {
+                        let mut result = target.to_string();
+                        result.replace_range(pos..pos + find.len(), replace_with);
+                        Ok(result)
+                    } else {
+                        Ok(target.to_string())
+                    }
+                }
+                OccurrenceOption::Custom(n) => {
+                    let mut count = 0;
+                    let mut search_start = 0;
+                    loop {
+                        let pos = if self.config.case_sensitive {
+                            target[search_start..].find(find)
+                        } else {
+                            target[search_start..].to_lowercase().find(&find.to_lowercase())
+                        };
+                        match pos {
+                            Some(relative_pos) => {
+                                count += 1;
+                                let actual_pos = search_start + relative_pos;
+                                if count == *n {
+                                    let mut result = target.to_string();
+                                    result.replace_range(actual_pos..actual_pos + find.len(), replace_with);
+                                    return Ok(result);
+                                }
+                                search_start = actual_pos + find.len();
+                            }
+                            None => break,
+                        }
+                    }
+                    Ok(target.to_string())
+                }
+            }
+        }
+    }
+}
+
+impl Method for ReplaceMethod {
+    fn name(&self) -> &str {
+        "Replace"
+    }
+
+    fn method_type(&self) -> MethodType {
+        MethodType::Replace
+    }
+
+    fn apply(&self, input: &str, context: &MethodContext) -> Result<String> {
+        let (name_part, ext_part) = split_name_ext(input, &context.original_ext);
+        let apply_to = &self.config.apply_to;
+
+        let target = match apply_to {
+            ApplyToOption::Name => name_part.as_str(),
+            ApplyToOption::Extension => ext_part.as_str(),
+            ApplyToOption::Both => input,
+        };
+
+        let result = self.apply_to_target(target)?;
+
+        match apply_to {
+            ApplyToOption::Name => Ok(format!("{}{}", result, ext_part)),
+            ApplyToOption::Extension => Ok(format!("{}{}", name_part, result)),
+            ApplyToOption::Both => Ok(result),
+        }
+    }
+
+    fn validate(&self) -> Result<()> {
+        if self.config.find.is_empty() {
+            bail!("Search pattern cannot be empty");
+        }
+
+        // Validate regex pattern if using regex mode
+        if self.config.use_regex {
+            Regex::new(&self.config.find).map_err(|e| {
+                anyhow::anyhow!("Invalid regex pattern: {}", e)
+            })?;
+        }
+
+        Ok(())
+    }
+
+    fn to_config(&self) -> MethodConfig {
+        MethodConfig::Replace(self.config.clone())
+    }
+
+    fn apply_to(&self) -> ApplyToOption {
+        self.config.apply_to.clone()
+    }
+}
+
+// ==================== NEWNAME METHOD ADAPTER ====================
+
+/// NewName method adapter - generates new filenames using templates with tags
+/// Replaces tags like <Name>, <Ext>, <Index>, <Inc:N>, <Date:...> with actual values
+#[derive(Debug)]
+pub struct NewNameMethodAdapter {
+    config: NewNameConfig,
+}
+
+impl NewNameMethodAdapter {
+    pub fn new(config: NewNameConfig) -> Self {
+        Self { config }
+    }
+}
+
+impl Method for NewNameMethodAdapter {
+    fn name(&self) -> &str { "NewName" }
+
+    fn method_type(&self) -> MethodType { MethodType::NewName }
+
+    fn apply(&self, _input: &str, context: &MethodContext) -> Result<String> {
+        let mut result = self.config.template.clone();
+
+        // Replace <Name> with original name (without extension)
+        result = result.replace("<Name>", &context.original_name);
+
+        // Replace <Ext> with original extension (with dot)
+        result = result.replace("<Ext>", &context.original_ext);
+
+        // Replace <Index> with 1-based file index
+        result = result.replace("<Index>", &format!("{}", context.file_index + 1));
+
+        // Replace <Inc:N> with zero-padded incrementing number
+        if let Some(inc_match) = regex::Regex::new(r"<Inc:(\d+)(?::(\d+))?>")
+            .ok()
+            .and_then(|re| re.find(&self.config.template))
+        {
+            let tag = inc_match.as_str();
+            let inner = &tag[5..tag.len()-1]; // Strip <Inc: and >
+            let parts: Vec<&str> = inner.split(':').collect();
+            
+            let padding: usize = parts[0].parse().unwrap_or(3);
+            let start: usize = if parts.len() > 1 { parts[1].parse().unwrap_or(1) } else { 1 };
+            
+            let number = start + context.file_index;
+            result = result.replace(tag, &format!("{:0>width$}", number, width = padding));
+        }
+
+        // Replace <Cnt:N> with total file count (zero-padded)
+        if let Some(cnt_match) = regex::Regex::new(r"<Cnt:(\d+)>")
+            .ok()
+            .and_then(|re| re.find(&self.config.template))
+        {
+            let tag = cnt_match.as_str();
+            let padding: usize = tag[5..tag.len()-1].parse().unwrap_or(3);
+            result = result.replace(tag, &format!("{:0>width$}", context.total_files, width = padding));
+        }
+
+        // Replace <Date:...> with current date
+        if let Some(date_match) = regex::Regex::new(r"<Date:([^>]+)>")
+            .ok()
+            .and_then(|re| re.find(&self.config.template))
+        {
+            let tag = date_match.as_str();
+            let format_str = &tag[6..tag.len()-1];
+            let now = chrono::Local::now();
+            let formatted = crate::methods::p1_methods::convert_chrono_format_pub(
+                format_str, &now.naive_local()
+            );
+            result = result.replace(tag, &formatted);
+        }
+
+        // Replace <Time:...> with current time
+        if let Some(time_match) = regex::Regex::new(r"<Time:([^>]+)>")
+            .ok()
+            .and_then(|re| re.find(&self.config.template))
+        {
+            let tag = time_match.as_str();
+            let format_str = &tag[6..tag.len()-1];
+            let now = chrono::Local::now();
+            let formatted = crate::methods::p1_methods::convert_chrono_format_pub(
+                format_str, &now.naive_local()
+            );
+            result = result.replace(tag, &formatted);
+        }
+
+        Ok(result)
+    }
+
+    fn validate(&self) -> Result<()> {
+        if self.config.template.is_empty() {
+            bail!("Template cannot be empty");
+        }
+        Ok(())
+    }
+
+    fn to_config(&self) -> MethodConfig {
+        MethodConfig::NewName(self.config.clone())
+    }
+
+    fn apply_to(&self) -> ApplyToOption {
+        self.config.apply_to.clone()
+    }
+}
+
+// ==================== ADD METHOD ====================
+
+/// Add method - inserts text at specified positions in filenames
+/// Supports adding at start, end, before/after extension, or custom position
+#[derive(Debug)]
+pub struct AddMethod {
+    config: AddConfig,
+}
+
+impl AddMethod {
+    /// Create a new Add method with the given configuration
+    pub fn new(config: AddConfig) -> Self {
+        Self { config }
+    }
+}
+
+impl Method for AddMethod {
+    fn name(&self) -> &str {
+        "Add"
+    }
+
+    fn method_type(&self) -> MethodType {
+        MethodType::Add
+    }
+
+    fn apply(&self, input: &str, context: &MethodContext) -> Result<String> {
+        let text = &self.config.text;
+        let apply_to = &self.config.apply_to;
+
+        // Split input into stem and extension
+        let (name_part, ext_part) = split_name_ext(input, &context.original_ext);
+
+        match &self.config.position {
+            AddPosition::Start => {
+                match apply_to {
+                    ApplyToOption::Name => {
+                        let new_name = if self.config.backwards {
+                            insert_at_end(&name_part, text)
+                        } else {
+                            format!("{}{}", text, name_part)
+                        };
+                        Ok(format!("{}{}", new_name, ext_part))
+                    }
+                    ApplyToOption::Extension => {
+                        let new_ext = if self.config.backwards {
+                            insert_at_end(&ext_part, text)
+                        } else {
+                            format!("{}{}", text, ext_part)
+                        };
+                        Ok(format!("{}{}", name_part, new_ext))
+                    }
+                    ApplyToOption::Both => {
+                        let new_full = if self.config.backwards {
+                            insert_at_end(input, text)
+                        } else {
+                            format!("{}{}", text, input)
+                        };
+                        Ok(new_full)
+                    }
+                }
+            }
+            AddPosition::End => {
+                match apply_to {
+                    ApplyToOption::Name => {
+                        let new_name = if self.config.backwards {
+                            insert_at_end(&name_part, text)
+                        } else {
+                            format!("{}{}", name_part, text)
+                        };
+                        Ok(format!("{}{}", new_name, ext_part))
+                    }
+                    ApplyToOption::Extension => {
+                        let new_ext = if self.config.backwards {
+                            insert_at_end(&ext_part, text)
+                        } else {
+                            format!("{}{}", ext_part, text)
+                        };
+                        Ok(format!("{}{}", name_part, new_ext))
+                    }
+                    ApplyToOption::Both => {
+                        let new_full = if self.config.backwards {
+                            insert_at_end(input, text)
+                        } else {
+                            format!("{}{}", input, text)
+                        };
+                        Ok(new_full)
+                    }
+                }
+            }
+            AddPosition::BeforeExt => {
+                match apply_to {
+                    ApplyToOption::Name => {
+                        let new_name = if self.config.backwards {
+                            insert_at_end(&name_part, text)
+                        } else {
+                            format!("{}{}", name_part, text)
+                        };
+                        Ok(format!("{}{}", new_name, ext_part))
+                    }
+                    ApplyToOption::Extension => {
+                        let new_ext = if self.config.backwards {
+                            insert_at_end(&ext_part, text)
+                        } else {
+                            format!("{}{}", text, ext_part)
+                        };
+                        Ok(format!("{}{}", name_part, new_ext))
+                    }
+                    ApplyToOption::Both => {
+                         let new_full = if self.config.backwards {
+                             insert_at_end(input, text)
+                         } else {
+                             let dot_pos = if !ext_part.is_empty() { input.rfind('.') } else { None };
+                             if let Some(pos) = dot_pos {
+                                 let (n, e) = input.split_at(pos);
+                                 format!("{}{}{}", n, text, e)
+                             } else {
+                                 format!("{}{}", input, text)
+                             }
+                         };
+                        Ok(new_full)
+                    }
+                }
+            }
+            AddPosition::AfterExt => {
+                match apply_to {
+                    ApplyToOption::Name => {
+                        Ok(format!("{}{}", name_part, text))
+                    }
+                    ApplyToOption::Extension => {
+                        let new_ext = if self.config.backwards {
+                            insert_at_end(&ext_part, text)
+                        } else {
+                            format!("{}{}", ext_part, text)
+                        };
+                        Ok(format!("{}{}", name_part, new_ext))
+                    }
+                    ApplyToOption::Both => {
+                        let new_full = if self.config.backwards {
+                            insert_at_end(input, text)
+                        } else {
+                            format!("{}{}", input, text)
+                        };
+                        Ok(new_full)
+                    }
+                }
+            }
+            AddPosition::Custom(pos) => {
+                match apply_to {
+                    ApplyToOption::Name => {
+                        let new_name = if self.config.backwards {
+                            let actual = name_part.chars().count().saturating_sub(*pos);
+                            insert_at_pos(&name_part, text, actual)
+                        } else {
+                            insert_at_pos(&name_part, text, *pos)
+                        };
+                        Ok(format!("{}{}", new_name, ext_part))
+                    }
+                    ApplyToOption::Extension => {
+                        let new_ext = if self.config.backwards {
+                            let actual = ext_part.chars().count().saturating_sub(*pos);
+                            insert_at_pos(&ext_part, text, actual)
+                        } else {
+                            insert_at_pos(&ext_part, text, *pos)
+                        };
+                        Ok(format!("{}{}", name_part, new_ext))
+                    }
+                    ApplyToOption::Both => {
+                        let new_full = if self.config.backwards {
+                            let actual = input.chars().count().saturating_sub(*pos);
+                            insert_at_pos(input, text, actual)
+                        } else {
+                            insert_at_pos(input, text, *pos)
+                        };
+                        Ok(new_full)
+                    }
+                }
+            }
+        }
+    }
+
+    fn validate(&self) -> Result<()> {
+        if self.config.text.is_empty() {
+            bail!("Text to add cannot be empty");
+        }
+        Ok(())
+    }
+
+    fn to_config(&self) -> MethodConfig {
+        MethodConfig::Add(self.config.clone())
+    }
+
+    fn apply_to(&self) -> ApplyToOption {
+        self.config.apply_to.clone()
+    }
+}
+
+// ==================== REMOVE METHOD ====================
+
+/// Remove method - removes characters from filenames based on various criteria
+/// Supports removal by position range, pattern matching, or character type
+#[derive(Debug)]
+pub struct RemoveMethod {
+    config: RemoveConfig,
+}
+
+impl RemoveMethod {
+    /// Create a new Remove method with the given configuration
+    pub fn new(config: RemoveConfig) -> Self {
+        Self { config }
+    }
+}
+
+impl Method for RemoveMethod {
+    fn name(&self) -> &str {
+        "Remove"
+    }
+
+    fn method_type(&self) -> MethodType {
+        MethodType::Remove
+    }
+
+    fn apply(&self, input: &str, context: &MethodContext) -> Result<String> {
+        let (name_part, ext_part) = split_name_ext(input, &context.original_ext);
+        let apply_to = &self.config.apply_to;
+
+        let result = match apply_to {
+            ApplyToOption::Name => {
+                let target = name_part.as_str();
+                match &self.config.position {
+                    RemovePosition::Start => {
+                        let count = self.config.count.min(target.chars().count());
+                        let chars: Vec<char> = target.chars().collect();
+                        let new_name: String = chars.iter().skip(count).collect();
+                        format!("{}{}", new_name, ext_part)
+                    }
+                    RemovePosition::End => {
+                        let count = self.config.count.min(target.chars().count());
+                        let chars: Vec<char> = target.chars().collect();
+                        let keep = chars.len().saturating_sub(count);
+                        let new_name: String = chars.iter().take(keep).collect();
+                        format!("{}{}", new_name, ext_part)
+                    }
+                }
+            }
+            ApplyToOption::Extension => {
+                // Extension part starts with '.', e.g. ".txt"
+                // When removing from extension, skip the leading '.' and operate on the actual extension text
+                let ext_chars: Vec<char> = ext_part.chars().collect();
+                let has_dot = !ext_chars.is_empty() && ext_chars[0] == '.';
+                let actual_ext: String = if has_dot {
+                    ext_chars.iter().skip(1).collect()
+                } else {
+                    ext_part.clone()
+                };
+
+                let new_ext_content: String = match &self.config.position {
+                    RemovePosition::Start => {
+                        let count = self.config.count.min(actual_ext.chars().count());
+                        let chars: Vec<char> = actual_ext.chars().collect();
+                        chars.iter().skip(count).collect()
+                    }
+                    RemovePosition::End => {
+                        let count = self.config.count.min(actual_ext.chars().count());
+                        let chars: Vec<char> = actual_ext.chars().collect();
+                        let keep = chars.len().saturating_sub(count);
+                        chars.iter().take(keep).collect()
+                    }
+                };
+
+                // Reassemble: keep the leading '.' + remaining extension content
+                if has_dot {
+                    format!("{}.{}", name_part, new_ext_content)
+                } else {
+                    format!("{}{}", name_part, new_ext_content)
+                }
+            }
+            ApplyToOption::Both => {
+                let target = input;
+                match &self.config.position {
+                    RemovePosition::Start => {
+                        let count = self.config.count.min(target.chars().count());
+                        let chars: Vec<char> = target.chars().collect();
+                        chars.iter().skip(count).collect()
+                    }
+                    RemovePosition::End => {
+                        let count = self.config.count.min(target.chars().count());
+                        let chars: Vec<char> = target.chars().collect();
+                        let keep = chars.len().saturating_sub(count);
+                        chars.iter().take(keep).collect()
+                    }
+                }
+            }
+        };
+
+        Ok(result)
+    }
+
+    fn validate(&self) -> Result<()> {
+        // Basic validation - can be extended based on specific remove type requirements
+        Ok(())
+    }
+
+    fn to_config(&self) -> MethodConfig {
+        MethodConfig::Remove(self.config.clone())
+    }
+
+    fn apply_to(&self) -> ApplyToOption {
+        self.config.apply_to.clone()
+    }
+}
+
+// ==================== NEWCASE METHOD ====================
+
+/// NewCase method - changes capitalization of filenames
+/// Supports uppercase, lowercase, title case, sentence case, and toggle case
+#[derive(Debug)]
+pub struct NewCaseMethod {
+    config: NewCaseConfig,
+}
+
+impl NewCaseMethod {
+    /// Create a new NewCase method with the given configuration
+    pub fn new(config: NewCaseConfig) -> Self {
+        Self { config }
+    }
+}
+
+impl Method for NewCaseMethod {
+    fn name(&self) -> &str {
+        "NewCase"
+    }
+
+    fn method_type(&self) -> MethodType {
+        MethodType::NewCase
+    }
+
+    fn apply(&self, input: &str, context: &MethodContext) -> Result<String> {
+        let (name_part, ext_part) = split_name_ext(input, &context.original_ext);
+        let apply_to = &self.config.apply_to;
+
+        let apply_case = |s: &str| -> String {
+            match &self.config.new_case {
+                CaseType::Lower => s.to_lowercase(),
+                CaseType::Upper => s.to_uppercase(),
+                CaseType::Title => {
+                    let words: Vec<&str> = s.split_whitespace().collect();
+                    let title_words: Vec<String> = words.iter()
+                        .map(|word| {
+                            if word.is_empty() {
+                                String::new()
+                            } else {
+                                let mut chars = word.chars();
+                                match chars.next() {
+                                    Some(first) => first.to_uppercase().to_string() + chars.as_str(),
+                                    None => String::new(),
+                                }
+                            }
+                        })
+                        .collect();
+                    title_words.join(" ")
+                }
+                CaseType::Sentence => {
+                    let mut result = String::new();
+                    let mut new_sentence = true;
+                    for c in s.chars() {
+                        if new_sentence && c.is_alphabetic() {
+                            result.push(c.to_uppercase().next().unwrap_or(c));
+                            new_sentence = false;
+                        } else {
+                            result.push(c);
+                            if c == '.' || c == '!' || c == '?' {
+                                new_sentence = true;
+                            }
+                        }
+                    }
+                    result
+                }
+                CaseType::Inverted => {
+                    s.chars()
+                        .map(|c| {
+                            if c.is_uppercase() {
+                                c.to_lowercase().next().unwrap_or(c)
+                            } else if c.is_lowercase() {
+                                c.to_uppercase().next().unwrap_or(c)
+                            } else {
+                                c
+                            }
+                        })
+                        .collect()
+                }
+            }
+        };
+
+        match apply_to {
+            ApplyToOption::Name => {
+                let transformed = apply_case(&name_part);
+                Ok(format!("{}{}", transformed, ext_part))
+            }
+            ApplyToOption::Extension => {
+                let transformed = apply_case(&ext_part);
+                Ok(format!("{}{}", name_part, transformed))
+            }
+            ApplyToOption::Both => {
+                let transformed = apply_case(input);
+                Ok(transformed)
+            }
+        }
+    }
+
+    fn validate(&self) -> Result<()> {
+        // All case types are valid by default
+        Ok(())
+    }
+
+    fn to_config(&self) -> MethodConfig {
+        MethodConfig::NewCase(self.config.clone())
+    }
+
+    fn apply_to(&self) -> ApplyToOption {
+        self.config.apply_to.clone()
+    }
+}

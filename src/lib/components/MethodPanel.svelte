@@ -245,11 +245,11 @@
 							</div>
 						</button>
 
-						<!-- 操作按钮（hover 时显示） -->
-						<div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-60 transition-opacity"
+						<!-- 操作按钮（始终显示） -->
+						<div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 transition-opacity"
 							role="group">
 							<button
-								class="p-0.5 rounded hover:bg-surface-500/20"
+								class="p-0.5 rounded hover:bg-surface-500/30 opacity-40 hover:opacity-100 transition-opacity"
 								onclick={(e) => { e.stopPropagation(); moveUp(index); }}
 								disabled={index === 0}
 								title="上移"
@@ -257,7 +257,7 @@
 								<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4l-6 6h4v6h4v-6h4z"/></svg>
 							</button>
 							<button
-								class="p-0.5 rounded hover:bg-surface-500/20"
+								class="p-0.5 rounded hover:bg-surface-500/30 opacity-40 hover:opacity-100 transition-opacity"
 								onclick={(e) => { e.stopPropagation(); moveDown(index); }}
 								disabled={index === methods.length - 1}
 								title="下移"
@@ -265,7 +265,7 @@
 								<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M10 16l6-6h-4V4H8v6H4z"/></svg>
 							</button>
 							<button
-								class="p-0.5 rounded hover:bg-red-500/20 text-red-400"
+								class="p-0.5 rounded hover:bg-red-500/30 text-red-500 opacity-40 hover:opacity-100 transition-opacity"
 								onclick={(e) => { e.stopPropagation(); removeMethod(index); }}
 								title="移除"
 							>

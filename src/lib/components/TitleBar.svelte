@@ -1,18 +1,16 @@
 <script lang="ts">
 	import { themeStore, AVAILABLE_THEMES } from '$lib/stores/theme';
 	import type { ThemeId } from '$lib/stores/theme';
-	import { browser } from '$app/environment';
-	import { getCurrentWindow } from '@tauri-apps/api/window';
+	import { onMount } from 'svelte';
 
 	let showThemeMenu = $state(false);
 	let isMaximized = $state(false);
-	let appWindow = $state<ReturnType<typeof getCurrentWindow> | null>(null);
+	let appWindow: any = null;
 
-	// 初始化 Tauri 窗口对象
-	$effect(() => {
-		if (!browser) return;
+	onMount(async () => {
+		const { getCurrentWindow } = await import('@tauri-apps/api/window');
 		appWindow = getCurrentWindow();
-		checkMaximized();
+		await checkMaximized();
 	});
 
 	async function checkMaximized() {

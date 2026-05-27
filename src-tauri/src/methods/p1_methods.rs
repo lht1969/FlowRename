@@ -2,6 +2,7 @@
 // These methods provide advanced renaming capabilities beyond the core P0 set
 
 use anyhow::{bail, Result};
+use chrono::Datelike;
 
 use crate::method_engine::traits::{Method, MethodContext};
 use crate::models::{
@@ -22,6 +23,18 @@ fn split_name_ext(input: &str, original_ext: &str) -> (String, String) {
     } else {
         (input.to_string(), String::new())
     }
+}
+
+/// Parse legacy date format (DDMM) to YYYY-MM-DD string for timestamp parsing
+fn parse_legacy_date_for_timestamp(legacy: &str) -> Option<String> {
+    if legacy.len() == 4 {
+        let day: u32 = legacy[..2].parse().ok()?;
+        let month: u32 = legacy[2..4].parse().ok()?;
+        let year = chrono::Local::now().date_naive().year();
+        return chrono::NaiveDate::from_ymd_opt(year, month, day)
+            .map(|d| d.format("%Y-%m-%dT00:00:00").to_string());
+    }
+    None
 }
 
 /// Move a range of characters within a string to a new position
@@ -73,6 +86,10 @@ impl Method for ListMethod {
     fn name(&self) -> &str { "List" }
 
     fn method_type(&self) -> MethodType { MethodType::List }
+
+    fn is_enabled(&self) -> bool {
+        self.config.enabled
+    }
 
     fn apply(&self, input: &str, context: &MethodContext) -> Result<String> {
         let (name_part, ext_part) = split_name_ext(input, &context.original_ext);
@@ -135,6 +152,10 @@ impl Method for MoveMethod {
 
     fn method_type(&self) -> MethodType { MethodType::Move }
 
+    fn is_enabled(&self) -> bool {
+        self.config.enabled
+    }
+
     fn apply(&self, input: &str, context: &MethodContext) -> Result<String> {
         let (name_part, ext_part) = split_name_ext(input, &context.original_ext);
         let apply_to = &self.config.apply_to;
@@ -189,6 +210,10 @@ impl Method for TrimMethod {
     fn name(&self) -> &str { "Trim" }
 
     fn method_type(&self) -> MethodType { MethodType::Trim }
+
+    fn is_enabled(&self) -> bool {
+        self.config.enabled
+    }
 
     fn apply(&self, input: &str, context: &MethodContext) -> Result<String> {
         let (name_part, ext_part) = split_name_ext(input, &context.original_ext);
@@ -263,6 +288,10 @@ impl Method for RenumberMethod {
     fn name(&self) -> &str { "Renumber" }
 
     fn method_type(&self) -> MethodType { MethodType::Renumber }
+
+    fn is_enabled(&self) -> bool {
+        self.config.enabled
+    }
 
     fn apply(&self, input: &str, context: &MethodContext) -> Result<String> {
         let (name_part, ext_part) = split_name_ext(input, &context.original_ext);
@@ -348,25 +377,53 @@ impl Method for TimestampMethod {
 
     fn method_type(&self) -> MethodType { MethodType::Timestamp }
 
+    fn is_enabled(&self) -> bool {
+        self.config.enabled
+    }
+
     fn apply(&self, input: &str, context: &MethodContext) -> Result<String> {
         let (name_part, ext_part) = split_name_ext(input, &context.original_ext);
         let apply_to = &self.config.apply_to;
 
-        let timestamp_str = match self.config.source {
-            TimestampSource::Created => context.created_time.clone(),
+        let formatted = match self.config.source {
+            TimestampSource::Created => {
+                context.created_time.clone()
+                    .or_else(|| context.modified_time.clone())
+            },
             TimestampSource::Modified => context.modified_time.clone(),
             TimestampSource::Accessed => context.accessed_time.clone(),
+            TimestampSource::ImgDate | TimestampSource::ImgTime => {
+                context.file_metadata.as_ref()
+                    .and_then(|m| m.image.as_ref())
+                    .and_then(|img| img.datetime_original.map(|dt| dt.format("%Y-%m-%dT%H:%M:%S").to_string()))
+            },
+            TimestampSource::VidDate | TimestampSource::VidTime => {
+                context.file_metadata.as_ref()
+                    .and_then(|m| m.video.as_ref())
+                    .and_then(|vid| vid.creation_date.map(|dt| dt.format("%Y-%m-%dT%H:%M:%S").to_string()))
+            },
+            TimestampSource::AudDate | TimestampSource::AudTime => {
+                context.file_metadata.as_ref()
+                    .and_then(|m| m.audio.as_ref())
+                    .and_then(|aud| aud.recording_date.map(|dt| dt.format("%Y-%m-%dT%H:%M:%S").to_string()))
+                    .or_else(|| {
+                        context.file_metadata.as_ref()
+                            .and_then(|m| m.audio.as_ref())
+                            .and_then(|aud| aud.legacy_date.as_ref())
+                            .and_then(|legacy| parse_legacy_date_for_timestamp(legacy))
+                    })
+            },
         };
 
-        let formatted = if let Some(ts) = timestamp_str {
-            match chrono::NaiveDateTime::parse_from_str(&ts, "%Y-%m-%dT%H:%M:%S") {
-                Ok(dt) => convert_chrono_format(&self.config.format, &dt),
-                Err(_) => {
-                    match chrono::NaiveDate::parse_from_str(&ts, "%Y-%m-%d") {
-                        Ok(d) => convert_chrono_format_date(&self.config.format, &d),
-                        Err(_) => ts,
-                    }
-                }
+        let formatted = if let Some(ts) = formatted {
+            if let Ok(dt) = chrono::DateTime::parse_from_rfc3339(&ts) {
+                convert_chrono_format(&self.config.format, &dt.naive_local())
+            } else if let Ok(dt) = chrono::NaiveDateTime::parse_from_str(&ts, "%Y-%m-%dT%H:%M:%S") {
+                convert_chrono_format(&self.config.format, &dt)
+            } else if let Ok(d) = chrono::NaiveDate::parse_from_str(&ts, "%Y-%m-%d") {
+                convert_chrono_format_date(&self.config.format, &d)
+            } else {
+                ts
             }
         } else {
             let now = chrono::Local::now();

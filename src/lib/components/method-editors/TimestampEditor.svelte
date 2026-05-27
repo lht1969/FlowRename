@@ -10,11 +10,27 @@
 		onChange({ ...config, ...partial });
 	}
 
-	/** 时间戳来源选项 */
-	const SOURCE_OPTIONS = [
-		{ value: 'Created' as const, label: '创建时间' },
-		{ value: 'Modified' as const, label: '修改时间' },
-		{ value: 'Accessed' as const, label: '访问时间' },
+	type SourceOption = { value: TimestampConfig['source']; label: string; group: string };
+
+	/** 时间戳来源选项 - 按媒体类型分组 */
+	const SOURCE_OPTIONS: SourceOption[] = [
+		{ value: 'Created', label: '创建', group: '文件' },
+		{ value: 'Modified', label: '修改', group: '文件' },
+		{ value: 'Accessed', label: '访问', group: '文件' },
+		{ value: 'ImgDate', label: '拍摄日期', group: '图片' },
+		{ value: 'ImgTime', label: '拍摄时间', group: '图片' },
+		{ value: 'VidDate', label: '创建日期', group: '视频' },
+		{ value: 'VidTime', label: '创建时间', group: '视频' },
+		{ value: 'AudDate', label: '录制日期', group: '音频' },
+		{ value: 'AudTime', label: '录制时间', group: '音频' },
+	];
+
+	/** 按组分类来源选项 */
+	const SOURCE_GROUPS = [
+		{ id: '文件', label: '文件', options: SOURCE_OPTIONS.filter(o => o.group === '文件') },
+		{ id: '图片', label: '图片', options: SOURCE_OPTIONS.filter(o => o.group === '图片') },
+		{ id: '视频', label: '视频', options: SOURCE_OPTIONS.filter(o => o.group === '视频') },
+		{ id: '音频', label: '音频', options: SOURCE_OPTIONS.filter(o => o.group === '音频') },
 	];
 
 	/** 常用格式预设 */
@@ -31,13 +47,20 @@
 	<!-- 时间戳来源 -->
 	<div class="flex items-center gap-2">
 		<span class="w-14 text-xs opacity-60 shrink-0">来源</span>
-		<div class="flex gap-1">
-			{#each SOURCE_OPTIONS as opt}
-				<button
-					class="px-2 py-0.5 rounded text-[11px] transition-colors
-						{config.source === opt.value ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-55 hover:opacity-75'}"
-					onclick={() => update({ source: opt.value })}
-				>{opt.label}</button>
+		<div class="flex flex-col gap-1">
+			{#each SOURCE_GROUPS as group}
+				<div class="flex items-center gap-1">
+					<span class="w-6 text-[10px] opacity-40 shrink-0">{group.label}</span>
+					<div class="flex gap-1">
+						{#each group.options as opt}
+							<button
+								class="px-1.5 py-0.5 rounded text-[10px] transition-colors
+									{config.source === opt.value ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-55 hover:opacity-75'}"
+								onclick={() => update({ source: opt.value })}
+							>{opt.label}</button>
+						{/each}
+					</div>
+				</div>
 			{/each}
 		</div>
 	</div>

@@ -67,6 +67,16 @@ impl Pipeline {
 
         // Execute each method in sequence
         for (index, method) in self.methods.iter().enumerate() {
+            // Skip disabled methods
+            if !method.is_enabled() {
+                log::debug!(
+                    "Skipping disabled method #{} ({})",
+                    index + 1,
+                    method.name()
+                );
+                continue;
+            }
+
             // Log progress for debugging and monitoring
             log::debug!(
                 "Executing method #{} ({}) on '{}' (length: {})",

@@ -14,6 +14,79 @@ impl VideoReader {
         "mp4", "m4v", "mov", "3gp",
     ];
 
+    /// 从 MP4 二进制数据中提取 mvhd box 的 creation_time
+    /// MP4 时间戳使用 1904-01-01 作为 epoch
+    fn extract_mp4_creation_time(data: &[u8]) -> Option<chrono::DateTime<chrono::Utc>> {
+        const MVHD_BOX_TYPE: &[u8; 4] = b"mvhd";
+        const MOOV_BOX_TYPE: &[u8; 4] = b"moov";
+        const MP4_EPOCH_OFFSET: i64 = -2082844800; // 1904-01-01 到 1970-01-01 的秒数差
+
+        let mut offset = 0;
+        while offset < data.len() - 8 {
+            let box_size = u32::from_be_bytes([data[offset], data[offset + 1], data[offset + 2], data[offset + 3]]) as usize;
+            let box_type = &data[offset + 4..offset + 8];
+
+            if box_size == 0 || box_size < 8 {
+                break;
+            }
+
+            if box_type == MOOV_BOX_TYPE {
+                let moov_start = offset + 8;
+                let moov_end = (offset + box_size).min(data.len());
+                let moov_data = &data[moov_start..moov_end];
+
+                let mut moov_offset = 0;
+                while moov_offset < moov_data.len() - 8 {
+                    let child_size = u32::from_be_bytes([moov_data[moov_offset], moov_data[moov_offset + 1], moov_data[moov_offset + 2], moov_data[moov_offset + 3]]) as usize;
+                    let child_type = &moov_data[moov_offset + 4..moov_offset + 8];
+
+                    if child_size == 0 || child_size < 8 {
+                        break;
+                    }
+
+                    if child_type == MVHD_BOX_TYPE {
+                        let mvhd_data = &moov_data[moov_offset + 8..moov_offset + child_size];
+                        if mvhd_data.len() >= 16 {
+                            let version = mvhd_data[0];
+
+                            let creation_secs = if version == 1 {
+                                if mvhd_data.len() < 24 {
+                                    break;
+                                }
+                                i64::from_be_bytes([
+                                    mvhd_data[8], mvhd_data[9], mvhd_data[10], mvhd_data[11],
+                                    mvhd_data[12], mvhd_data[13], mvhd_data[14], mvhd_data[15]
+                                ])
+                            } else {
+                                if mvhd_data.len() < 16 {
+                                    break;
+                                }
+                                u32::from_be_bytes([
+                                    mvhd_data[8], mvhd_data[9], mvhd_data[10], mvhd_data[11]
+                                ]) as i64
+                            };
+
+                            const BEIJING_OFFSET_SECS: i64 = 8 * 3600;
+                            let local_secs = creation_secs - BEIJING_OFFSET_SECS;
+                            let unix_secs = local_secs.checked_add(MP4_EPOCH_OFFSET)?;
+                            if let Some(dt) = chrono::DateTime::from_timestamp(unix_secs, 0) {
+                                return Some(dt);
+                            }
+                        }
+                        break;
+                    }
+
+                    moov_offset += child_size;
+                }
+                break;
+            }
+
+            offset += box_size;
+        }
+
+        None
+    }
+
     /// 从视频文件提取元数据
     /// 根据文件扩展名选择合适的解析器
     /// 返回 None 表示无法读取或无元数据
@@ -42,6 +115,9 @@ impl VideoReader {
         };
 
         let mut metadata = VideoMetadata::default();
+
+        // 提取视频创建日期 (从 mvhd box 的 creation_time)
+        metadata.creation_date = Self::extract_mp4_creation_time(&data);
 
         // 从全局 timescale 计算总时长
         if let Some(ref global_ts) = context.timescale {

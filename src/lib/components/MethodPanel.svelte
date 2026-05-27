@@ -10,11 +10,14 @@
 		{ id: 'Add', label: '添加', icon: '＋', desc: '在指定位置插入文本' },
 		{ id: 'Remove', label: '删除', icon: '✕', desc: '移除指定位置的字符' },
 		{ id: 'NewCase', label: '大小写', icon: 'Aa', desc: '更改字母大小写' },
-		{ id: 'NewName', label: '新名称', icon: '✎', desc: '使用模板生成新名称' },
-		{ id: 'List', label: '列表', icon: '☰', desc: '从名称列表重命名' },
 		{ id: 'Move', label: '移动', icon: '↔', desc: '移动文件名中的字符' },
 		{ id: 'Trim', label: '修剪', icon: '✂', desc: '修剪首尾字符' },
 		{ id: 'Renumber', label: '编号', icon: '#', desc: '添加序号编号' },
+	] as const;
+
+	const SPECIAL_METHOD_TYPES = [
+		{ id: 'NewName', label: '新名称', icon: '✎', desc: '使用模板生成新名称' },
+		{ id: 'List', label: '列表', icon: '☰', desc: '从名称列表重命名' },
 		{ id: 'Timestamp', label: '时间戳', icon: '🕐', desc: '使用文件时间戳' }
 	] as const;
 
@@ -95,29 +98,54 @@
 		});
 	}
 
+	/** 切换方法启用/禁用状态 */
+	function toggleEnabled(index: number, e: Event) {
+		const checkbox = e.target as HTMLInputElement;
+		methodsStore.update((m) => {
+			const arr = [...m];
+			const method = arr[index];
+			const typeKey = getMethodType(method);
+			if (typeKey) {
+				const config = (method as any)[typeKey];
+				if (config) {
+					config.enabled = checkbox.checked;
+				}
+			}
+			return arr;
+		});
+	}
+
+	/** 获取方法的启用状态 */
+	function isMethodEnabled(config: MethodConfig): boolean {
+		const typeKey = getMethodType(config);
+		if (!typeKey) return true;
+		const configData = (config as any)[typeKey];
+		return configData?.enabled !== false;
+	}
+
 	/** 创建方法的默认配置 */
 	function createDefaultConfig(typeId: string): MethodConfig | null {
 		switch (typeId) {
 			case 'Replace':
-				return { Replace: { find: '', replaceWith: '', occurrence: 'All', caseSensitive: false, useRegex: false, applyTo: 'Name' } };
+			return { Replace: { enabled: true, find: '', replaceWith: '', occurrence: 'All', caseSensitive: false, useRegex: false, applyTo: 'Name' } };
 			case 'Add':
-				return { Add: { text: '', position: 'Start', customIndex: null, backwards: false, applyTo: 'Name' } };
+			return { Add: { enabled: true, text: '', position: 'Start', customIndex: null, backwards: false, applyTo: 'Name' } };
 			case 'Remove':
-				return { Remove: { count: 1, position: 'Start', applyTo: 'Name' } };
+			return { Remove: { enabled: true, count: 1, position: 'Start', applyTo: 'Name' } };
 			case 'NewCase':
-				return { NewCase: { newCase: 'Upper', location: 'All', applyTo: 'Name' } };
+			return { NewCase: { enabled: true, newCase: 'Upper', location: 'All', applyTo: 'Name' } };
 			case 'NewName':
-				return { NewName: { template: '<Name>', applyTo: 'Name' } };
+			return { NewName: { enabled: true, template: '<Name>', applyTo: 'Name' } };
 			case 'List':
-				return { List: { names: [], overflowBehavior: 'KeepOriginal', applyTo: 'Name' } };
+			return { List: { enabled: true, names: [], overflowBehavior: 'KeepOriginal', applyTo: 'Name' } };
 			case 'Move':
-				return { Move: { fromStart: 0, count: 1, toPosition: 0, applyTo: 'Name' } };
+			return { Move: { enabled: true, fromStart: 0, count: 1, toPosition: 0, applyTo: 'Name' } };
 			case 'Trim':
-				return { Trim: { trimStart: '', trimEnd: '', trimWhitespace: false, applyTo: 'Name' } };
+			return { Trim: { enabled: true, trimStart: '', trimEnd: '', trimWhitespace: false, applyTo: 'Name' } };
 			case 'Renumber':
-				return { Renumber: { start: 1, step: 1, padding: 3, position: 'Prefix', separator: '_', applyTo: 'Name' } };
+			return { Renumber: { enabled: true, start: 1, step: 1, padding: 3, position: 'Prefix', separator: '_', applyTo: 'Name' } };
 			case 'Timestamp':
-				return { Timestamp: { source: 'Modified', format: 'YYYY-MM-DD', applyTo: 'Name' } };
+			return { Timestamp: { enabled: true, source: 'Modified', format: 'YYYY-MM-DD', applyTo: 'Name' } };
 			default:
 				return null;
 		}
@@ -235,6 +263,20 @@
 			</button>
 		{/each}
 	</div>
+	<!-- 特殊方法一行（新名称、列表、时间戳） -->
+	<div class="flex flex-wrap gap-1 px-3 py-2 border-b border-surface-500/10">
+		{#each SPECIAL_METHOD_TYPES as method}
+			<button
+				class="adr-method-btn flex items-center gap-1 px-2 py-1 text-xs rounded-md
+					hover:bg-surface-500/20 transition-colors border border-surface-500/10"
+				onclick={() => addMethod(method.id)}
+				title={method.desc}
+			>
+				<span class="opacity-65">{method.icon}</span>
+				<span>{method.label}</span>
+			</button>
+		{/each}
+	</div>
 
 	<!-- 已添加的方法列表（Pipeline） -->
 	<div class="flex-1 overflow-y-auto px-2 py-2">
@@ -249,10 +291,11 @@
 			{#each methods as method, index (index)}
 				<div class="adr-method-item mb-2 rounded-lg border border-surface-500/15 overflow-hidden transition-all duration-[var(--adr-transition-normal)]
 					hover:border-surface-500/30
-					{expandedIndex === index ? 'ring-1 ring-blue-500/30 border-blue-500/20' : ''}">
+					{expandedIndex === index ? 'ring-1 ring-blue-500/30 border-blue-500/20' : ''}
+					{!isMethodEnabled(method) ? 'opacity-50' : ''}">
 					<!-- 左侧色条 -->
 					<div class="flex">
-						<div class="w-[3px] shrink-0 {METHOD_COLORS[getMethodType(method)] || 'bg-surface-500'}"></div>
+						<div class="w-[3px] shrink-0 {!isMethodEnabled(method) ? 'bg-surface-500' : (METHOD_COLORS[getMethodType(method)] || 'bg-surface-500')}"></div>
 						<div class="flex-1 min-w-0">
 							<!-- 方法头部 -->
 							<div class="relative">
@@ -297,6 +340,13 @@
 									>
 										<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M10 16l6-6h-4V4H8v6H4z"/></svg>
 									</button>
+									<input
+										type="checkbox"
+										class="w-4 h-4 rounded border-surface-500/30 bg-surface-200 text-blue-500 focus:ring-blue-500/20 cursor-pointer"
+										checked={isMethodEnabled(method)}
+										onchange={(e) => toggleEnabled(index, e)}
+										title="启用/禁用此方法"
+									/>
 									<button
 										class="p-1 rounded hover:bg-red-500/20 text-red-500 opacity-40 hover:opacity-100 transition-all"
 										onclick={(e) => { e.stopPropagation(); removeMethod(index); }}

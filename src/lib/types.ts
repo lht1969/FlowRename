@@ -108,6 +108,7 @@ export type MethodConfig =
   | { Timestamp: TimestampConfig };
 
 export interface ReplaceConfig {
+  enabled: boolean;
   find: string;
   replaceWith: string;
   occurrence: "All" | "First" | "Last" | { Custom: number };
@@ -117,6 +118,7 @@ export interface ReplaceConfig {
 }
 
 export interface AddConfig {
+  enabled: boolean;
   text: string;
   position: "Start" | "End" | { Custom: number };
   customIndex: number | null;
@@ -125,24 +127,28 @@ export interface AddConfig {
 }
 
 export interface RemoveConfig {
+  enabled: boolean;
   count: number;
   position: "Start" | "End";
   applyTo: "Name" | "Extension" | "Both";
 }
 
 export interface NewCaseConfig {
+  enabled: boolean;
   newCase: "Lower" | "Upper" | "Title" | "Sentence" | "Inverted";
   location: "All" | "First";
   applyTo: "Name" | "Extension" | "Both";
 }
 
 export interface NewNameConfig {
+  enabled: boolean;
   template: string;
   applyTo: "Name" | "Extension" | "Both";
 }
 
 /** List method - rename files from a list of names */
 export interface ListConfig {
+  enabled: boolean;
   names: string[];
   overflowBehavior: "KeepOriginal" | "Skip" | "Cycle";
   applyTo: "Name" | "Extension" | "Both";
@@ -150,6 +156,7 @@ export interface ListConfig {
 
 /** Move method - move characters within filename */
 export interface MoveConfig {
+  enabled: boolean;
   fromStart: number;
   count: number;
   toPosition: number;
@@ -158,6 +165,7 @@ export interface MoveConfig {
 
 /** Trim method - trim characters from edges */
 export interface TrimConfig {
+  enabled: boolean;
   trimStart: string;
   trimEnd: string;
   trimWhitespace: boolean;
@@ -166,6 +174,7 @@ export interface TrimConfig {
 
 /** Renumber method - add sequential numbers */
 export interface RenumberConfig {
+  enabled: boolean;
   start: number;
   step: number;
   padding: number;
@@ -176,7 +185,8 @@ export interface RenumberConfig {
 
 /** Timestamp method - rename based on file timestamps */
 export interface TimestampConfig {
-  source: "Created" | "Modified" | "Accessed";
+  enabled: boolean;
+  source: "Created" | "Modified" | "Accessed" | "ImgDate" | "ImgTime" | "VidDate" | "VidTime" | "AudDate" | "AudTime";
   format: string;
   applyTo: "Name" | "Extension" | "Both";
 }

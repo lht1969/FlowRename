@@ -95,4 +95,8 @@ pub trait Method: Send + Sync + std::fmt::Debug {
     /// Get which part(s) of the filename this method applies to
     /// Determines whether the method affects Name, Extension, or Both
     fn apply_to(&self) -> ApplyToOption;
+
+    /// Check if this method is enabled
+    /// Disabled methods are skipped during pipeline execution
+    fn is_enabled(&self) -> bool;
 }

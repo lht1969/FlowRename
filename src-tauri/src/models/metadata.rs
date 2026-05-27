@@ -109,4 +109,13 @@ pub struct AudioMetadata {
 
     /// Bitrate in kbps (e.g., 320 for 320kbps MP3)
     pub bitrate: Option<u32>,
+
+    /// 录制日期（ID3v2.4 TDRC 字段，优先使用）
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recording_date: Option<chrono::DateTime<Utc>>,
+
+    /// 旧版录制日期（ID3v2.2/2.3 TDAT/TIME 字段，降级使用）
+    /// 格式通常为 DDMM 或 DDMMHHmm
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub legacy_date: Option<String>,
 }

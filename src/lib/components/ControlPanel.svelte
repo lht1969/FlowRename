@@ -9,7 +9,7 @@
 		canExecuteStore,
 		statsStore
 	} from '$lib/stores/app';
-	import { previewRename, executeRename, undoLastRename, getUndoStatus } from '$lib/commands';
+	import { executeRename, undoLastRename, getUndoStatus } from '$lib/commands';
 	import type { RenameItem } from '$lib/types';
 	import TagPanel from '$lib/components/TagPanel.svelte';
 	import { detectFileCategories } from '$lib/stores/fileCategories';
@@ -44,35 +44,6 @@
 	let progressPercent = $derived(
 		progress ? Math.round((progress.current / progress.total) * 100) : 0
 	);
-
-	/** 预览重命名结果 */
-	async function handlePreview() {
-		if (methods.length === 0 || files.length === 0) return;
-
-		loadingStore.set(true);
-		statusMessageStore.set('正在生成预览...');
-		progress = { current: 0, total: files.length, phase: '预览' };
-
-		try {
-			const result = await previewRename({ methods });
-			previewStore.set(result.files);
-
-			if (result.error) {
-				statusMessageStore.set('预览失败: ' + result.error);
-			} else {
-				progress.current = files.length;
-				statusMessageStore.set(
-					`预览完成: ${result.changedCount} 个文件将重命名` +
-					(result.conflictCount > 0 ? `，${result.conflictCount} 个冲突` : '')
-				);
-			}
-		} catch (e) {
-			statusMessageStore.set('预览异常: ' + String(e));
-		} finally {
-			loadingStore.set(false);
-			setTimeout(() => { progress = null; }, 800);
-		}
-	}
 
 	/** 执行重命名操作 */
 	async function handleExecute() {
@@ -168,21 +139,6 @@
 
 	<!-- 操作按钮 -->
 	<div class="flex flex-col gap-2 px-3 py-3">
-		<!-- 预览按钮 -->
-		<button
-			class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium rounded-lg
-				bg-blue-500/90 hover:bg-blue-500 text-white transition-all
-				disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98]"
-			onclick={handlePreview}
-			disabled={loading || methods.length === 0 || files.length === 0}
-		>
-			<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-				<path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-				<path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-			</svg>
-			预览重命名
-		</button>
-
 		<!-- 执行按钮 -->
 		<button
 			class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium rounded-lg transition-all

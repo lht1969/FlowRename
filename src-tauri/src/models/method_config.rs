@@ -129,11 +129,17 @@ pub enum CaseLocation {
 
 // ==================== METHOD CONFIGURATIONS ====================
 
+fn default_true() -> bool { true }
+
 /// Configuration for the Replace method
 /// Replaces text patterns in filenames using plain text or regex
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReplaceConfig {
+    /// Whether this method is enabled
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+
     /// Text or regex pattern to find
     pub find: String,
     
@@ -158,6 +164,10 @@ pub struct ReplaceConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AddConfig {
+    /// Whether this method is enabled
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+
     /// Text to insert
     pub text: String,
     
@@ -186,6 +196,10 @@ pub enum RemovePosition {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RemoveConfig {
+    /// Whether this method is enabled
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+
     /// Number of characters to remove
     pub count: usize,
     
@@ -201,6 +215,10 @@ pub struct RemoveConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NewCaseConfig {
+    /// Whether this method is enabled
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+
     /// Target case transformation type
     pub new_case: CaseType,
     
@@ -216,6 +234,10 @@ pub struct NewCaseConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NewNameConfig {
+    /// Whether this method is enabled
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+
     /// Template string containing tags like "<Date:YYYYMMDD>_<Inc:3>"
     pub template: String,
     
@@ -228,6 +250,10 @@ pub struct NewNameConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ListConfig {
+    /// Whether this method is enabled
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+
     /// List of new names (one per line, matched by file index)
     pub names: Vec<String>,
     
@@ -257,6 +283,10 @@ fn default_list_overflow() -> ListOverflow { ListOverflow::KeepOriginal }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MoveConfig {
+    /// Whether this method is enabled
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+
     /// Start position of the text to move (0-based)
     pub from_start: usize,
     
@@ -275,6 +305,10 @@ pub struct MoveConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TrimConfig {
+    /// Whether this method is enabled
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+
     /// Characters to trim from the start (empty = no trim)
     #[serde(default)]
     pub trim_start: String,
@@ -296,6 +330,10 @@ pub struct TrimConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RenumberConfig {
+    /// Whether this method is enabled
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+
     /// Starting number for the sequence
     #[serde(default = "default_renumber_start")]
     pub start: usize,
@@ -341,6 +379,10 @@ fn default_renumber_position() -> RenumberPosition { RenumberPosition::Prefix }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TimestampConfig {
+    /// Whether this method is enabled
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+
     /// Which timestamp to use
     #[serde(default = "default_timestamp_source")]
     pub source: TimestampSource,
@@ -362,6 +404,18 @@ pub enum TimestampSource {
     Modified,
     /// File last accessed time
     Accessed,
+    /// Image EXIF original date/time
+    ImgDate,
+    /// Image EXIF original time
+    ImgTime,
+    /// Video creation date
+    VidDate,
+    /// Video creation time
+    VidTime,
+    /// Audio recording date (ID3 TDRC)
+    AudDate,
+    /// Audio recording time (ID3 TDRC)
+    AudTime,
 }
 
 fn default_timestamp_source() -> TimestampSource { TimestampSource::Modified }

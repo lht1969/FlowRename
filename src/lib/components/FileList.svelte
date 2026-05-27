@@ -320,10 +320,11 @@
 				{@const previewItem = previewMap.get(file.originalPath)}
 				<div
 					class="adr-file-row grid grid-cols-[32px_1fr_70px_1fr] gap-2 px-3 py-1.5 text-xs
-						border-b border-surface-500/5 transition-all duration-[var(--adr-transition-fast)]
+						border-b border-surface-500/5 transition-all duration-300 ease-out
 						hover:bg-surface-500/10 hover:pl-[11px] hover:border-l-[3px] hover:border-l-blue-500/40
 						{index % 2 === 1 ? 'bg-surface-500/[0.03]' : ''}
 						{getRowClass(previewItem)}"
+					data-preview-updated={previewItem?.isChanged ? 'true' : 'false'}
 				>
 					<!-- 行号 -->
 					<span class="text-center opacity-30 text-[11px] select-none">{index + 1}</span>
@@ -337,13 +338,13 @@
 					<span class="opacity-50">{formatSize(file.fileSize)}</span>
 
 					<!-- 预览名称 -->
-					{#if previewItem?.isChanged}
+					{#if previewItem?.hasConflict}
+						<span class="adr-truncate font-bold text-red-600 dark:text-red-400" title="冲突: {previewItem.newName}">
+							🚫 {previewItem.newName}
+						</span>
+					{:else if previewItem?.isChanged}
 						<span class="adr-truncate text-green-600/80 dark:text-green-400/80" title={previewItem.newName}>
 							{previewItem.newName}
-						</span>
-					{:else if previewItem?.hasConflict}
-						<span class="adr-truncate text-amber-600/80 dark:text-amber-400/80" title="冲突: {previewItem.newName}">
-							⚠ {previewItem.newName}
 						</span>
 					{:else}
 						<span class="adr-truncate opacity-30">—</span>
@@ -366,5 +367,26 @@
 
 	.adr-file-row {
 		animation: adr-fade-in 150ms ease forwards;
+	}
+
+	/* 预览更新时的平滑过渡高亮 */
+	.adr-file-row[data-preview-updated="true"] {
+		transition: background-color 0.3s ease-out, color 0.3s ease-out;
+	}
+
+	/* 冲突文件行 - 明显红色背景标记 */
+	.adr-conflict-row {
+		background-color: rgba(239, 68, 68, 0.15) !important;
+		border-left: 3px solid rgba(239, 68, 68, 0.8) !important;
+		animation: adr-conflict-pulse 1.5s ease-in-out infinite;
+	}
+
+	.adr-conflict-row:hover {
+		background-color: rgba(239, 68, 68, 0.25) !important;
+	}
+
+	@keyframes adr-conflict-pulse {
+		0%, 100% { background-color: rgba(239, 68, 68, 0.15); }
+		50% { background-color: rgba(239, 68, 68, 0.25); }
 	}
 </style>

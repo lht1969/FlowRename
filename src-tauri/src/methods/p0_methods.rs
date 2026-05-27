@@ -183,6 +183,10 @@ impl Method for ReplaceMethod {
         MethodType::Replace
     }
 
+    fn is_enabled(&self) -> bool {
+        self.config.enabled
+    }
+
     fn apply(&self, input: &str, context: &MethodContext) -> Result<String> {
         let (name_part, ext_part) = split_name_ext(input, &context.original_ext);
         let apply_to = &self.config.apply_to;
@@ -246,6 +250,10 @@ impl Method for NewNameMethodAdapter {
 
     fn method_type(&self) -> MethodType { MethodType::NewName }
 
+    fn is_enabled(&self) -> bool {
+        self.config.enabled
+    }
+
     fn apply(&self, _input: &str, context: &MethodContext) -> Result<String> {
         use crate::tag_system::TagEvaluator;
         let evaluator = TagEvaluator::new();
@@ -291,6 +299,10 @@ impl Method for AddMethod {
 
     fn method_type(&self) -> MethodType {
         MethodType::Add
+    }
+
+    fn is_enabled(&self) -> bool {
+        self.config.enabled
     }
 
     fn apply(&self, input: &str, context: &MethodContext) -> Result<String> {
@@ -489,6 +501,10 @@ impl Method for RemoveMethod {
         MethodType::Remove
     }
 
+    fn is_enabled(&self) -> bool {
+        self.config.enabled
+    }
+
     fn apply(&self, input: &str, context: &MethodContext) -> Result<String> {
         let (name_part, ext_part) = split_name_ext(input, &context.original_ext);
         let apply_to = &self.config.apply_to;
@@ -602,6 +618,10 @@ impl Method for NewCaseMethod {
 
     fn method_type(&self) -> MethodType {
         MethodType::NewCase
+    }
+
+    fn is_enabled(&self) -> bool {
+        self.config.enabled
     }
 
     fn apply(&self, input: &str, context: &MethodContext) -> Result<String> {

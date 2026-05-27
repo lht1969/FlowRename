@@ -1,5 +1,5 @@
 use anyhow::{bail, Result};
-use chrono::Utc;
+use chrono::{DateTime, Datelike, Utc};
 
 use crate::method_engine::MethodContext;
 
@@ -92,6 +92,7 @@ impl TagEvaluator {
             "ImgAperture" | "ExifAperture" | "FNumber" => self.eval_exif_aperture(context),
             "ImgFocal" | "ExifFocalLength" | "FocalLen" => self.eval_exif_focal_length(context),
             "ImgExposure" | "ExifExposureTime" | "ExpTime" => self.eval_exif_exposure_time(context),
+            "ImgTime" => self.eval_exif_time(modifiers, context),
 
             // ==================== VIDEO TAGS (Vid prefix) ====================
             "VidWidth" => self.eval_video_width(context),
@@ -104,6 +105,7 @@ impl TagEvaluator {
             "VidDate" | "VidDateOrig" => self.eval_video_date(modifiers, context),
             "VidCodec" => self.eval_video_codec(context),
             "VidBitRate" | "VidBitrate" => self.eval_video_bitrate(context),
+            "VidTime" => self.eval_video_time(modifiers, context),
 
             // ==================== AUDIO TAGS (Aud prefix) ====================
             "AudTitle" | "Id3Title" | "MusicTitle" => self.eval_id3_title(context),
@@ -116,6 +118,8 @@ impl TagEvaluator {
             "AudDurationSec" => self.eval_audio_duration_secs(context),
             "AudBitRate" | "AudBitrate" => self.eval_audio_bitrate(context),
             "AudDisc" => self.eval_audio_disc(modifiers, context),
+            "AudDate" => self.eval_audio_date(modifiers, context),
+            "AudTime" => self.eval_audio_time(modifiers, context),
 
             // Unknown tag
             _ => bail!("Unknown tag: '{}'. Supported tags: Name, Ext, Index, Date, Time, Inc, Cnt, Img*, Vid*, Aud*", tag_name),
@@ -164,6 +168,18 @@ impl TagEvaluator {
         
         let now = Utc::now();
         Ok(now.format(self.convert_chrono_format(format)).to_string())
+    }
+
+    fn parse_legacy_date(&self, legacy: &str) -> Option<chrono::DateTime<Utc>> {
+        if legacy.len() == 4 {
+            let day: u32 = legacy[..2].parse().ok()?;
+            let month: u32 = legacy[2..4].parse().ok()?;
+            let year = Utc::now().date_naive().year();
+            return chrono::NaiveDate::from_ymd_opt(year, month, day)
+                .and_then(|d| d.and_hms_opt(0, 0, 0))
+                .map(|dt| DateTime::from_naive_utc_and_offset(dt, Utc));
+        }
+        None
     }
 
     /// Convert our custom format specifiers to chrono's format
@@ -352,6 +368,23 @@ impl TagEvaluator {
         }
     }
 
+    fn eval_exif_time(&self, modifiers: &[String], context: &MethodContext) -> Result<String> {
+        let format = modifiers.first()
+            .map(|s| s.as_str())
+            .unwrap_or("HHmmss");
+
+        match &context.file_metadata {
+            Some(meta) => match &meta.image {
+                Some(img) => match img.datetime_original {
+                    Some(dt) => Ok(dt.format(self.convert_chrono_format(format)).to_string()),
+                    None => bail!("Original date/time metadata not available"),
+                },
+                None => bail!("No image metadata available"),
+            },
+            None => bail!("No file metadata available. Ensure MetadataReader is enabled."),
+        }
+    }
+
     // ==================== ID3 TAG IMPLEMENTATIONS ====================
 
     fn eval_id3_title(&self, context: &MethodContext) -> Result<String> {
@@ -429,6 +462,47 @@ impl TagEvaluator {
                 Some(audio) => match &audio.genre {
                     Some(genre) => Ok(genre.clone()),
                     None => bail!("ID3 genre tag not available"),
+                },
+                None => bail!("No audio metadata available"),
+            },
+            None => bail!("No file metadata available. Ensure MetadataReader is enabled."),
+        }
+    }
+
+    fn eval_audio_date(&self, modifiers: &[String], context: &MethodContext) -> Result<String> {
+        let format = modifiers.first()
+            .map(|s| s.as_str())
+            .unwrap_or("YYYYMMDD");
+
+        match &context.file_metadata {
+            Some(meta) => match &meta.audio {
+                Some(audio) => {
+                    if let Some(dt) = &audio.recording_date {
+                        return Ok(dt.format(self.convert_chrono_format(format)).to_string());
+                    }
+                    if let Some(legacy) = &audio.legacy_date {
+                        if let Some(parsed) = self.parse_legacy_date(legacy) {
+                            return Ok(parsed.format(self.convert_chrono_format(format)).to_string());
+                        }
+                    }
+                    bail!("Audio recording date not available (TDRC/TDAT)")
+                },
+                None => bail!("No audio metadata available"),
+            },
+            None => bail!("No file metadata available. Ensure MetadataReader is enabled."),
+        }
+    }
+
+    fn eval_audio_time(&self, modifiers: &[String], context: &MethodContext) -> Result<String> {
+        let format = modifiers.first()
+            .map(|s| s.as_str())
+            .unwrap_or("HHmmss");
+
+        match &context.file_metadata {
+            Some(meta) => match &meta.audio {
+                Some(audio) => match &audio.recording_date {
+                    Some(dt) => Ok(dt.format(self.convert_chrono_format(format)).to_string()),
+                    None => bail!("Audio recording date not available"),
                 },
                 None => bail!("No audio metadata available"),
             },
@@ -569,6 +643,23 @@ impl TagEvaluator {
                 Some(vid) => match vid.bit_rate {
                     Some(br) => Ok(br.to_string()),
                     None => bail!("Video bitrate metadata not available"),
+                },
+                None => bail!("No video metadata available"),
+            },
+            None => bail!("No file metadata available. Ensure MetadataReader is enabled."),
+        }
+    }
+
+    fn eval_video_time(&self, modifiers: &[String], context: &MethodContext) -> Result<String> {
+        let format = modifiers.first()
+            .map(|s| s.as_str())
+            .unwrap_or("HHmmss");
+
+        match &context.file_metadata {
+            Some(meta) => match &meta.video {
+                Some(vid) => match vid.creation_date {
+                    Some(dt) => Ok(dt.format(self.convert_chrono_format(format)).to_string()),
+                    None => bail!("Video creation date metadata not available"),
                 },
                 None => bail!("No video metadata available"),
             },

@@ -18,6 +18,20 @@
 		{ id: 'Timestamp', label: '时间戳', icon: '🕐', desc: '使用文件时间戳' }
 	] as const;
 
+	/** 方法类型 → 左侧色条颜色 */
+	const METHOD_COLORS: Record<string, string> = {
+		Replace: 'bg-blue-500',
+		Add: 'bg-emerald-500',
+		Remove: 'bg-red-500',
+		NewCase: 'bg-purple-500',
+		NewName: 'bg-amber-500',
+		List: 'bg-cyan-500',
+		Move: 'bg-orange-500',
+		Trim: 'bg-pink-500',
+		Renumber: 'bg-teal-500',
+		Timestamp: 'bg-violet-500',
+	};
+
 	let methods = $derived($methodsStore);
 
 	/** 当前展开编辑的方法索引 */
@@ -139,6 +153,21 @@
 		return '?';
 	}
 
+	/** 获取方法类型标识 */
+	function getMethodType(config: MethodConfig): string {
+		if ('Replace' in config) return 'Replace';
+		if ('Add' in config) return 'Add';
+		if ('Remove' in config) return 'Remove';
+		if ('NewCase' in config) return 'NewCase';
+		if ('NewName' in config) return 'NewName';
+		if ('List' in config) return 'List';
+		if ('Move' in config) return 'Move';
+		if ('Trim' in config) return 'Trim';
+		if ('Renumber' in config) return 'Renumber';
+		if ('Timestamp' in config) return 'Timestamp';
+		return '';
+	}
+
 	/** 获取方法的简要描述 */
 	function getMethodSummary(config: MethodConfig): string {
 		if ('Replace' in config) {
@@ -189,7 +218,7 @@
 	<!-- 面板标题 -->
 	<div class="flex items-center justify-between px-3 py-2 border-b border-surface-500/20">
 		<h2 class="text-sm font-semibold opacity-80">重命名方法</h2>
-		<span class="text-xs opacity-40">{methods.length} 个方法</span>
+		<span class="text-xs opacity-55">{methods.length} 个方法</span>
 	</div>
 
 	<!-- 方法添加按钮组 -->
@@ -201,7 +230,7 @@
 				onclick={() => addMethod(method.id)}
 				title={method.desc}
 			>
-				<span class="opacity-60">{method.icon}</span>
+				<span class="opacity-65">{method.icon}</span>
 				<span>{method.label}</span>
 			</button>
 		{/each}
@@ -210,7 +239,7 @@
 	<!-- 已添加的方法列表（Pipeline） -->
 	<div class="flex-1 overflow-y-auto px-2 py-2">
 		{#if methods.length === 0}
-			<div class="flex flex-col items-center justify-center h-full opacity-30 text-center px-4">
+			<div class="flex flex-col items-center justify-center h-full opacity-55 text-center px-4">
 				<svg class="w-8 h-8 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
 					<path d="M12 4v16m8-8H4" />
 				</svg>
@@ -218,72 +247,78 @@
 			</div>
 		{:else}
 			{#each methods as method, index (index)}
-				<div class="adr-method-item mb-1 rounded-md bg-surface-500/10 overflow-hidden transition-colors
-					{expandedIndex === index ? 'ring-1 ring-blue-500/30' : ''}">
-					<!-- 方法头部（点击展开/折叠） -->
-					<div class="relative">
-						<button type="button" class="group flex items-center gap-2 px-2 py-1.5 w-full text-left cursor-pointer hover:bg-surface-500/10"
-							onclick={() => toggleExpand(index)}>
-							<!-- 展开/折叠箭头 -->
-							<svg class="w-3 h-3 opacity-30 transition-transform {expandedIndex === index ? 'rotate-90' : ''}"
-								viewBox="0 0 20 20" fill="currentColor">
-								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-							</svg>
+				<div class="adr-method-item mb-2 rounded-lg border border-surface-500/15 overflow-hidden transition-all duration-[var(--adr-transition-normal)]
+					hover:border-surface-500/30
+					{expandedIndex === index ? 'ring-1 ring-blue-500/30 border-blue-500/20' : ''}">
+					<!-- 左侧色条 -->
+					<div class="flex">
+						<div class="w-[3px] shrink-0 {METHOD_COLORS[getMethodType(method)] || 'bg-surface-500'}"></div>
+						<div class="flex-1 min-w-0">
+							<!-- 方法头部 -->
+							<div class="relative">
+								<button type="button" class="group flex items-center gap-2.5 px-3 py-2 w-full text-left cursor-pointer hover:bg-surface-500/5"
+									onclick={() => toggleExpand(index)}>
+									<!-- 展开/折叠箭头 -->
+									<svg class="w-3 h-3 opacity-50 transition-transform duration-[var(--adr-transition-fast)] {expandedIndex === index ? 'rotate-90' : ''}"
+										viewBox="0 0 20 20" fill="currentColor">
+										<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+									</svg>
 
-							<!-- 方法序号 -->
-							<span class="text-xs opacity-30 w-4 text-center">{index + 1}</span>
+									<!-- 方法序号 -->
+									<span class="text-xs opacity-50 w-4 text-center shrink-0">{index + 1}</span>
 
-							<!-- 方法图标 -->
-							<span class="text-sm opacity-60">{getMethodIcon(method)}</span>
+									<!-- 方法图标 -->
+									<span class="text-sm shrink-0">{getMethodIcon(method)}</span>
 
-							<!-- 方法名称 + 摘要 -->
-							<div class="flex-1 min-w-0">
-								<span class="text-sm">{getMethodLabel(method)}</span>
-								{#if expandedIndex !== index}
-									<span class="text-[10px] opacity-30 ml-1 adr-truncate">{getMethodSummary(method)}</span>
-								{/if}
+									<!-- 方法名称 + 摘要 -->
+									<div class="flex-1 min-w-0">
+										<span class="text-sm font-medium">{getMethodLabel(method)}</span>
+										{#if expandedIndex !== index}
+											<span class="text-[11px] opacity-50 ml-1.5 adr-truncate">{getMethodSummary(method)}</span>
+										{/if}
+									</div>
+								</button>
+
+								<!-- 操作按钮 -->
+								<div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 transition-opacity" role="group">
+									<button
+										class="p-1 rounded hover:bg-surface-500/20 opacity-40 hover:opacity-80 transition-all"
+										onclick={(e) => { e.stopPropagation(); moveUp(index); }}
+										disabled={index === 0}
+										title="上移"
+									>
+										<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4l-6 6h4v6h4v-6h4z"/></svg>
+									</button>
+									<button
+										class="p-1 rounded hover:bg-surface-500/20 opacity-40 hover:opacity-80 transition-all"
+										onclick={(e) => { e.stopPropagation(); moveDown(index); }}
+										disabled={index === methods.length - 1}
+										title="下移"
+									>
+										<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M10 16l6-6h-4V4H8v6H4z"/></svg>
+									</button>
+									<button
+										class="p-1 rounded hover:bg-red-500/20 text-red-500 opacity-40 hover:opacity-100 transition-all"
+										onclick={(e) => { e.stopPropagation(); removeMethod(index); }}
+										title="移除"
+									>
+										<svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+									</button>
+								</div>
 							</div>
-						</button>
 
-						<!-- 操作按钮（始终显示） -->
-						<div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 transition-opacity"
-							role="group">
-							<button
-								class="p-0.5 rounded hover:bg-surface-500/30 opacity-40 hover:opacity-100 transition-opacity"
-								onclick={(e) => { e.stopPropagation(); moveUp(index); }}
-								disabled={index === 0}
-								title="上移"
-							>
-								<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4l-6 6h4v6h4v-6h4z"/></svg>
-							</button>
-							<button
-								class="p-0.5 rounded hover:bg-surface-500/30 opacity-40 hover:opacity-100 transition-opacity"
-								onclick={(e) => { e.stopPropagation(); moveDown(index); }}
-								disabled={index === methods.length - 1}
-								title="下移"
-							>
-								<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M10 16l6-6h-4V4H8v6H4z"/></svg>
-							</button>
-							<button
-								class="p-0.5 rounded hover:bg-red-500/30 text-red-500 opacity-40 hover:opacity-100 transition-opacity"
-								onclick={(e) => { e.stopPropagation(); removeMethod(index); }}
-								title="移除"
-							>
-								<svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-							</button>
+							<!-- 方法配置编辑器 -->
+							{#if expandedIndex === index}
+								<div class="px-3 py-2.5 border-t border-surface-500/10 bg-surface-500/5">
+									<MethodEditor
+										config={method}
+										{index}
+										onUpdate={updateMethodConfig}
+									/>
+								</div>
+							{/if}
 						</div>
 					</div>
-
-				<!-- 方法配置编辑器（展开时显示） -->
-				{#if expandedIndex === index}
-						<div class="px-3 py-2 border-t border-surface-500/10 bg-surface-500/5">
-							<MethodEditor
-								config={method}
-								{index}
-								onUpdate={updateMethodConfig}
-							/>
-						</div>
-					{/if}
 				</div>
 			{/each}
 		{/if}

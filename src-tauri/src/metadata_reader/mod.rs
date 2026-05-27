@@ -1,14 +1,16 @@
-// Metadata Reader module - Extracts EXIF and ID3 metadata from files
-// Supports JPEG/TIFF EXIF data and MP3 ID3 tags
+// Metadata Reader module - Extracts EXIF, ID3 and Video metadata from files
+// Supports JPEG/TIFF EXIF data, MP3 ID3 tags, and MP4 video metadata
 
 pub mod exif_reader;
 pub mod id3_reader;
+pub mod video_reader;
 
 use crate::models::metadata::FileMetadata;
 use std::path::Path;
 
 pub use exif_reader::ExifReader;
 pub use id3_reader::Id3Reader;
+pub use video_reader::VideoReader;
 
 /// Unified metadata reader that dispatches to the appropriate
 /// specialized reader based on file extension
@@ -23,6 +25,12 @@ impl MetadataReader {
     /// Supported audio extensions for ID3 extraction
     const AUDIO_EXTENSIONS: &'static [&'static str] = &[
         "mp3", "wav", "flac", "ogg", "m4a", "aac", "wma",
+    ];
+
+    /// 支持的视频扩展名
+    const VIDEO_EXTENSIONS: &'static [&'static str] = &[
+        "mp4", "avi", "mkv", "mov", "wmv", "flv", "webm",
+        "m4v", "mpg", "mpeg", "3gp", "ts",
     ];
 
     /// Extract metadata from a file based on its extension
@@ -57,6 +65,11 @@ impl MetadataReader {
             metadata.audio = Id3Reader::extract(path);
         }
 
+        // 提取视频元数据
+        if Self::VIDEO_EXTENSIONS.contains(&extension.as_str()) {
+            metadata.video = VideoReader::extract(path);
+        }
+
         metadata
     }
 
@@ -77,5 +90,6 @@ impl MetadataReader {
         let ext_lower = ext.to_lowercase();
         Self::IMAGE_EXTENSIONS.contains(&ext_lower.as_str())
             || Self::AUDIO_EXTENSIONS.contains(&ext_lower.as_str())
+            || Self::VIDEO_EXTENSIONS.contains(&ext_lower.as_str())
     }
 }

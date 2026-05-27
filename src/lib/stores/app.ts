@@ -1,8 +1,8 @@
 // AdRename - Application state stores
 // Central state management for the rename workflow
 
-import { writable, derived } from 'svelte/store';
-import type { FileItem, MethodConfig, FilePreviewItem } from '$lib/types';
+import { writable, derived } from "svelte/store";
+import type { FileItem, MethodConfig, FilePreviewItem } from "$lib/types";
 
 /** 当前加载的文件列表 */
 export const filesStore = writable<FileItem[]>([]);
@@ -17,10 +17,10 @@ export const previewStore = writable<FilePreviewItem[]>([]);
 export const loadingStore = writable<boolean>(false);
 
 /** 状态栏消息 */
-export const statusMessageStore = writable<string>('就绪');
+export const statusMessageStore = writable<string>("就绪");
 
 /** 当前扫描的目录路径 */
-export const currentDirStore = writable<string>('');
+export const currentDirStore = writable<string>("");
 
 /** 是否递归扫描 */
 export const recursiveStore = writable<boolean>(false);
@@ -29,16 +29,26 @@ export const recursiveStore = writable<boolean>(false);
 export const extensionFilterStore = writable<string[]>([]);
 
 /** 派生 Store：变更文件数量统计 */
-export const statsStore = derived([filesStore, previewStore], ([$files, $preview]) => {
-	const total = $files.length;
-	const changed = $preview.filter((p) => p.isChanged).length;
-	const conflicts = $preview.filter((p) => p.hasConflict).length;
-	const unchanged = total - changed;
+export const statsStore = derived(
+  [filesStore, previewStore],
+  ([$files, $preview]) => {
+    const total = $files.length;
+    const changed = $preview.filter((p) => p.isChanged).length;
+    const conflicts = $preview.filter((p) => p.hasConflict).length;
+    const unchanged = total - changed;
 
-	return { total, changed, conflicts, unchanged };
-});
+    return { total, changed, conflicts, unchanged };
+  },
+);
 
 /** 派生 Store：是否有可执行的重命名操作 */
-export const canExecuteStore = derived([previewStore, loadingStore], ([$preview, $loading]) => {
-	return $preview.some((p) => p.isChanged) && !$loading && $preview.every((p) => !p.hasConflict);
-});
+export const canExecuteStore = derived(
+  [previewStore, loadingStore],
+  ([$preview, $loading]) => {
+    return (
+      $preview.some((p) => p.isChanged) &&
+      !$loading &&
+      $preview.every((p) => !p.hasConflict)
+    );
+  },
+);

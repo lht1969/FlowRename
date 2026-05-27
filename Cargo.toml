@@ -39,3 +39,6 @@ kamadak-exif = "0.5"
 
 # Audio metadata (ID3)
 id3 = "1"
+
+# Video metadata (MP4 container parsing)
+mp4parse = "0.17"

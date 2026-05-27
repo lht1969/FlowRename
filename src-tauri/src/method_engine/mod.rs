@@ -6,4 +6,4 @@ pub mod pipeline;
 
 // Re-export main types for convenient access
 pub use traits::{Method, MethodContext};
-pub use pipeline::Pipeline;
+pub use pipeline::{Pipeline, sanitize_filename};

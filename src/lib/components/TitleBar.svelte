@@ -63,7 +63,7 @@
 			</svg>
 		</div>
 		<span class="text-sm font-semibold tracking-wide opacity-80">AdRename</span>
-		<span class="text-xs opacity-40 ml-1">v1.0</span>
+		<span class="text-xs opacity-55 ml-1">v1.0</span>
 	</div>
 
 	<div class="flex items-center gap-1">
@@ -92,7 +92,8 @@
 							<span class="w-3 h-3 rounded-full" style="background: var(--color-surface-500);"></span>
 							<span>{theme.label}</span>
 							{#if $themeStore === theme.id}
-								<svg class="w-3.5 h-3.5 ml-auto text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+								<svg class="w-3.5 h-3.5 ml-auto" viewBox="0 0 20 20" fill="currentColor"
+									style="color: {theme.isDark ? 'rgb(96, 165, 250)' : 'rgb(37, 99, 235)'};">
 									<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
 								</svg>
 							{/if}

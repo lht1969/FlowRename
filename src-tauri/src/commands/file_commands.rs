@@ -3,7 +3,7 @@ use tauri::State;
 use std::sync::Mutex;
 use std::path::PathBuf;
 
-use crate::file_manager::scanner::FileManager;
+use crate::file_manager::scanner::{FileManager, sort_file_items};
 use crate::models::file_item::FileItem;
 use crate::commands::rename_commands::UndoEntry;
 use crate::undo_manager::UndoManager;
@@ -142,6 +142,48 @@ pub async fn scan_directory(
             })
         }
     }
+}
+
+/// Request structure for sorting files
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SortFilesRequest {
+    /// List of files to sort (passed by value since sorting is in-place)
+    pub files: Vec<FileItem>,
+
+    /// Field to sort by: "name", "size", or "modified"
+    #[serde(default = "default_sort_field")]
+    pub field: String,
+
+    /// Sort in descending order (true) or ascending order (false)
+    #[serde(default = "default_sort_desc")]
+    pub desc: bool,
+}
+
+fn default_sort_field() -> String {
+    "name".to_string()
+}
+
+fn default_sort_desc() -> bool {
+    false
+}
+
+/// Response structure for sort results
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SortFilesResponse {
+    pub files: Vec<FileItem>,
+}
+
+/// Command: Sort a list of files by the specified field and direction.
+///
+/// Uses natural sorting (StrCmpLogicalW style) for filename comparisons to match
+/// Windows Explorer's sorting behavior.
+#[tauri::command]
+pub async fn sort_files(request: SortFilesRequest) -> Result<SortFilesResponse, String> {
+    let mut files = request.files;
+    sort_file_items(&mut files, &request.field, request.desc);
+    Ok(SortFilesResponse { files })
 }
 
 /// Command: Clear the current file list from memory

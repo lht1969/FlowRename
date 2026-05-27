@@ -255,3 +255,181 @@ impl FileManager {
         })
     }
 }
+
+/// Sorts a list of FileItem objects by the specified field and direction.
+///
+/// Uses natural sorting (StrCmpLogicalW style) for filename comparisons, where:
+///   - Digit sequences are compared as numbers: "file2" < "file10"
+///   - ASCII letters are compared case-insensitively: "a" == "A"
+///   - Non-ASCII characters (e.g. Chinese) are compared by Unicode code point
+///
+/// This is more compatible with Windows Explorer's sorting than standard lexicographic sort.
+pub fn sort_file_items(items: &mut Vec<FileItem>, field: &str, desc: bool) {
+    match field {
+        "name" => {
+            items.sort_by(|a, b| {
+                let cmp = compare_filename_natural(&a.original_name, &b.original_name);
+                if desc { cmp.reverse() } else { cmp }
+            });
+        }
+        "size" => {
+            items.sort_by(|a, b| {
+                let cmp = a.file_size.cmp(&b.file_size);
+                if desc { cmp.reverse() } else { cmp }
+            });
+        }
+        "modified" => {
+            items.sort_by(|a, b| {
+                let cmp = a.modified_time.cmp(&b.modified_time);
+                if desc { cmp.reverse() } else { cmp }
+            });
+        }
+        _ => {
+            items.sort_by(|a, b| {
+                let cmp = compare_filename_natural(&a.original_name, &b.original_name);
+                if desc { cmp.reverse() } else { cmp }
+            });
+        }
+    }
+}
+
+/// 检查字符是否为汉字 (CJK Unified Ideographs)
+fn is_cjk_char(c: char) -> bool {
+    matches!(c, '\u{4E00}'..='\u{9FFF}')
+        || matches!(c, '\u{3400}'..='\u{4DBF}')
+        || matches!(c, '\u{20000}'..='\u{2A6DF}')
+        || matches!(c, '\u{2A700}'..='\u{2B73F}')
+        || matches!(c, '\u{2B740}'..='\u{2B81F}')
+        || matches!(c, '\u{2B820}'..='\u{2CEAF}')
+        || matches!(c, '\u{2F800}'..='\u{2FA1F}')
+}
+
+/// 获取单个汉字的拼音，如果字符不是汉字则返回 None
+fn get_char_pinyin(c: char) -> Option<String> {
+    if is_cjk_char(c) {
+        let args = pinyin::Args::new();
+        let result = pinyin::lazy_pinyin(&c.to_string(), &args);
+        if !result.is_empty() {
+            return Some(result[0].to_string());
+        }
+    }
+    None
+}
+
+/// 自然排序文件名比较函数 (StrCmpLogicalW 风格, 支持拼音排序)
+fn compare_filename_natural(a: &str, b: &str) -> std::cmp::Ordering {
+    let a_chars: Vec<char> = a.chars().collect();
+    let b_chars: Vec<char> = b.chars().collect();
+    let mut a_idx = 0;
+    let mut b_idx = 0;
+
+    while a_idx < a_chars.len() && b_idx < b_chars.len() {
+        let a_ch = a_chars[a_idx];
+        let b_ch = b_chars[b_idx];
+
+        if a_ch.is_ascii_digit() && b_ch.is_ascii_digit() {
+            let a_num = extract_number(&a_chars, &mut a_idx);
+            let b_num = extract_number(&b_chars, &mut b_idx);
+            match a_num.cmp(&b_num) {
+                std::cmp::Ordering::Equal => {}
+                ord => return ord,
+            }
+        } else {
+            let a_pinyin = get_char_pinyin(a_ch);
+            let b_pinyin = get_char_pinyin(b_ch);
+
+            match (a_pinyin, b_pinyin) {
+                (Some(ap), Some(bp)) => {
+                    match ap.cmp(&bp) {
+                        std::cmp::Ordering::Equal => {
+                            a_idx += 1;
+                            b_idx += 1;
+                        }
+                        ord => return ord,
+                    }
+                }
+                (Some(_), None) => {
+                    let a_lower = a_ch.to_ascii_lowercase();
+                    let b_lower = b_ch.to_ascii_lowercase();
+                    match a_lower.cmp(&b_lower) {
+                        std::cmp::Ordering::Equal => {
+                            a_idx += 1;
+                            b_idx += 1;
+                        }
+                        ord => return ord,
+                    }
+                }
+                (None, Some(_)) => {
+                    let a_lower = a_ch.to_ascii_lowercase();
+                    let b_lower = b_ch.to_ascii_lowercase();
+                    match a_lower.cmp(&b_lower) {
+                        std::cmp::Ordering::Equal => {
+                            a_idx += 1;
+                            b_idx += 1;
+                        }
+                        ord => return ord,
+                    }
+                }
+                (None, None) => {
+                    let a_lower = a_ch.to_ascii_lowercase();
+                    let b_lower = b_ch.to_ascii_lowercase();
+                    match a_lower.cmp(&b_lower) {
+                        std::cmp::Ordering::Equal => {
+                            a_idx += 1;
+                            b_idx += 1;
+                        }
+                        ord => return ord,
+                    }
+                }
+            }
+        }
+    }
+
+    a_chars.len().cmp(&b_chars.len())
+}
+
+fn extract_number(chars: &[char], start_idx: &mut usize) -> u64 {
+    let mut num_str = String::new();
+    while *start_idx < chars.len() && chars[*start_idx].is_ascii_digit() {
+        num_str.push(chars[*start_idx]);
+        *start_idx += 1;
+    }
+    num_str.parse().unwrap_or(0)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_natural_sort_chinese() {
+        let mut names = vec!["安次得胜口马氏家谱序", "新建 DOCX 文档", "AI编程工具OpenCode"];
+        names.sort_by(|a, b| compare_filename_natural(a, b));
+        assert_eq!(names[0], "AI编程工具OpenCode");
+        assert_eq!(names[1], "安次得胜口马氏家谱序");
+        assert_eq!(names[2], "新建 DOCX 文档");
+    }
+
+    #[test]
+    fn test_natural_sort_numbers() {
+        let mut names = vec!["file10", "file2", "file1"];
+        names.sort_by(|a, b| compare_filename_natural(a, b));
+        assert_eq!(names[0], "file1");
+        assert_eq!(names[1], "file2");
+        assert_eq!(names[2], "file10");
+    }
+
+    #[test]
+    fn test_natural_sort_mixed() {
+        let mut names = vec![
+            "本项目的结果-AI编程工具OpenCode",
+            "新建 DOCX 文档",
+            "安次得胜口马氏家谱序",
+        ];
+        names.sort_by(|a, b| compare_filename_natural(a, b));
+        // 拼音: 安(an) < 本(ben) < 新(xin)
+        assert_eq!(names[0], "安次得胜口马氏家谱序");
+        assert_eq!(names[1], "本项目的结果-AI编程工具OpenCode");
+        assert_eq!(names[2], "新建 DOCX 文档");
+    }
+}

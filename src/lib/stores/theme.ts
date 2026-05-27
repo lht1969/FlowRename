@@ -9,18 +9,19 @@ export const AVAILABLE_THEMES = [
   { id: "modern", label: "Modern", isDark: true },
   { id: "wintry", label: "Wintry", isDark: true },
   { id: "obsidian", label: "Obsidian", isDark: true },
+  { id: "daylight", label: "Daylight", isDark: false },
 ] as const;
 
 export type ThemeId = (typeof AVAILABLE_THEMES)[number]["id"];
 
 /** 从 localStorage 恢复主题设置 */
 function getStoredTheme(): ThemeId {
-  if (!browser) return "modern";
+  if (!browser) return "wintry";
   const stored = localStorage.getItem("adr-theme");
   if (stored && AVAILABLE_THEMES.some((t) => t.id === stored)) {
     return stored as ThemeId;
   }
-  return "modern";
+  return "wintry";
 }
 
 /** 主题 Store - 响应式主题状态管理 */

@@ -57,6 +57,7 @@ pub fn run() {
                 commands::file_commands::scan_directory,
                 commands::file_commands::scan_files,
                 commands::file_commands::clear_files,
+                commands::file_commands::sort_files,
                 commands::preview_commands::preview_rename,
                 commands::rename_commands::execute_rename,
                 commands::rename_commands::undo_last_rename,

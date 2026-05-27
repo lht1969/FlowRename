@@ -14,7 +14,7 @@
 <div class="space-y-2 text-xs">
 	<!-- 修剪空白字符开关 -->
 	<div class="flex items-center gap-2">
-		<span class="w-12 opacity-50 shrink-0">空白</span>
+		<span class="w-14 text-xs opacity-60 shrink-0">空白</span>
 		<button
 			class="relative w-8 h-4 rounded-full transition-colors
 				{config.trimWhitespace ? 'bg-blue-500/60' : 'bg-surface-500/20'}"
@@ -27,38 +27,38 @@
 					{config.trimWhitespace ? 'left-4.5' : 'left-0.5'}"
 			></span>
 		</button>
-		<span class="opacity-40">修剪首尾空白</span>
+		<span class="opacity-55">修剪首尾空白</span>
 	</div>
 
 	{#if !config.trimWhitespace}
 		<!-- 修剪开头字符 -->
 		<div class="flex items-center gap-2">
-			<label for="trim-start" class="w-12 opacity-50 shrink-0">开头</label>
+			<label for="trim-start" class="w-14 text-xs opacity-60 shrink-0">开头</label>
 			<input
 				id="trim-start"
 				type="text"
-				class="flex-1 bg-surface-500/10 border border-surface-500/20 rounded px-2 py-1 text-xs
-					focus:outline-none focus:border-blue-500/50 adr-mono"
-				placeholder="要修剪的字符（如: 0 _-）"
-				value={config.trimStart}
+class="flex-1 bg-surface-500/10 border border-surface-500/20 rounded px-2 py-1 text-xs
+				focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 adr-mono"
+		placeholder="要修剪的字符（如: 0 _-）"
+		value={config.trimStart}
 				oninput={(e) => update({ trimStart: (e.target as HTMLInputElement).value })}
 			/>
 		</div>
 
 		<!-- 修剪末尾字符 -->
 		<div class="flex items-center gap-2">
-			<label for="trim-end" class="w-12 opacity-50 shrink-0">末尾</label>
+			<label for="trim-end" class="w-14 text-xs opacity-60 shrink-0">末尾</label>
 			<input
 				id="trim-end"
 				type="text"
-				class="flex-1 bg-surface-500/10 border border-surface-500/20 rounded px-2 py-1 text-xs
-					focus:outline-none focus:border-blue-500/50 adr-mono"
-				placeholder="要修剪的字符（如: 0 _-）"
-				value={config.trimEnd}
+class="flex-1 bg-surface-500/10 border border-surface-500/20 rounded px-2 py-1 text-xs
+				focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 adr-mono"
+		placeholder="要修剪的字符（如: 0 _-）"
+		value={config.trimEnd}
 				oninput={(e) => update({ trimEnd: (e.target as HTMLInputElement).value })}
 			/>
 		</div>
 
-		<p class="opacity-30 text-[10px] px-2">输入的每个字符都会被从对应方向修剪</p>
+		<p class="opacity-50 text-[11px] px-2">输入的每个字符都会被从对应方向修剪</p>
 	{/if}
 </div>

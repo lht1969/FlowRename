@@ -15,12 +15,12 @@
 <div class="space-y-2 text-xs">
 	<!-- 查找文本 -->
 	<div class="flex items-center gap-2">
-		<label for="replace-find" class="w-12 opacity-50 shrink-0">查找</label>
+		<label for="replace-find" class="w-14 text-xs opacity-60 shrink-0">查找</label>
 		<input
 			id="replace-find"
 			type="text"
 			class="flex-1 bg-surface-500/10 border border-surface-500/20 rounded px-2 py-1 text-xs
-				focus:outline-none focus:border-blue-500/50 transition-colors"
+				focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-colors"
 			placeholder="输入要查找的文本"
 			value={config.find}
 			oninput={(e) => update({ find: (e.target as HTMLInputElement).value })}
@@ -29,12 +29,12 @@
 
 	<!-- 替换文本 -->
 	<div class="flex items-center gap-2">
-		<label for="replace-with" class="w-12 opacity-50 shrink-0">替换为</label>
+		<label for="replace-with" class="w-14 text-xs opacity-60 shrink-0">替换为</label>
 		<input
 			id="replace-with"
 			type="text"
 			class="flex-1 bg-surface-500/10 border border-surface-500/20 rounded px-2 py-1 text-xs
-				focus:outline-none focus:border-blue-500/50 transition-colors"
+				focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-colors"
 			placeholder="替换后的文本"
 			value={config.replaceWith}
 			oninput={(e) => update({ replaceWith: (e.target as HTMLInputElement).value })}
@@ -43,11 +43,11 @@
 
 	<!-- 匹配范围 -->
 	<div class="flex items-center gap-2">
-		<label for="replace-occurrence" class="w-12 opacity-50 shrink-0">范围</label>
+		<label for="replace-occurrence" class="w-14 text-xs opacity-60 shrink-0">范围</label>
 		<select
 			id="replace-occurrence"
 			class="flex-1 bg-surface-500/10 border border-surface-500/20 rounded px-2 py-1 text-xs
-				focus:outline-none focus:border-blue-500/50"
+				focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20"
 			value={typeof config.occurrence === 'string' ? config.occurrence : 'Custom'}
 			onchange={(e) => {
 				const val = (e.target as HTMLSelectElement).value;
@@ -68,7 +68,7 @@
 	<!-- 自定义位置（仅当选择 Custom 时显示） -->
 	{#if typeof config.occurrence === 'object' && 'Custom' in config.occurrence}
 		<div class="flex items-center gap-2">
-			<label for="replace-custom-pos" class="w-12 opacity-50 shrink-0">位置</label>
+			<label for="replace-custom-pos" class="w-14 text-xs opacity-60 shrink-0">位置</label>
 			<input
 				id="replace-custom-pos"
 				type="number"
@@ -84,22 +84,22 @@
 	<!-- 选项行 -->
 	<div class="flex items-center gap-3 pt-1">
 		<label class="flex items-center gap-1 cursor-pointer opacity-60 hover:opacity-80 transition-opacity">
-			<input type="checkbox" checked={config.caseSensitive} onchange={() => update({ caseSensitive: !config.caseSensitive })} class="w-3 h-3" />
+			<input type="checkbox" checked={config.caseSensitive} onchange={() => update({ caseSensitive: !config.caseSensitive })} class="w-3.5 h-3.5 rounded border-surface-500/30 text-blue-500 focus:ring-blue-500/30 focus:ring-offset-0" />
 			<span>区分大小写</span>
 		</label>
 		<label class="flex items-center gap-1 cursor-pointer opacity-60 hover:opacity-80 transition-opacity">
-			<input type="checkbox" checked={config.useRegex} onchange={() => update({ useRegex: !config.useRegex })} class="w-3 h-3" />
+			<input type="checkbox" checked={config.useRegex} onchange={() => update({ useRegex: !config.useRegex })} class="w-3.5 h-3.5 rounded border-surface-500/30 text-blue-500 focus:ring-blue-500/30 focus:ring-offset-0" />
 			<span>正则表达式</span>
 		</label>
 	</div>
 
 	<!-- 应用目标 -->
 	<div class="flex items-center gap-2">
-		<span class="w-12 opacity-50 shrink-0">应用</span>
+		<span class="w-14 text-xs opacity-60 shrink-0">应用</span>
 		<div class="flex gap-1">
 			{#each ['Name', 'Extension', 'Both'] as target}
 				<button
-					class="px-2 py-0.5 rounded text-[10px] transition-colors {config.applyTo === target ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-50 hover:opacity-70'}"
+					class="px-2 py-0.5 rounded text-[11px] transition-colors {config.applyTo === target ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-55 hover:opacity-75'}"
 					onclick={() => update({ applyTo: target as 'Name' | 'Extension' | 'Both' })}
 				>
 					{target === 'Name' ? '文件名' : target === 'Extension' ? '扩展名' : '全部'}

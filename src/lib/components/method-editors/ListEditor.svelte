@@ -39,27 +39,27 @@
 				value={localNamesText}
 				oninput={handleNamesInput}
 			></textarea>
-			<p class="opacity-30 mt-1 text-[10px]">每行一个名称，按文件顺序对应</p>
+			<p class="opacity-55 mt-1 text-[11px]">每行一个名称，按文件顺序对应</p>
 		</div>
 	</div>
 
 	<!-- 溢出行为 -->
 	<div class="flex items-center gap-2">
-		<span class="w-12 opacity-50 shrink-0">溢出</span>
+		<span class="w-14 text-xs opacity-60 shrink-0">溢出</span>
 		<div class="flex gap-1">
 			<button
-				class="px-2 py-0.5 rounded text-[10px] transition-colors
-					{config.overflowBehavior === 'KeepOriginal' ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-50 hover:opacity-70'}"
+				class="px-2 py-0.5 rounded text-[11px] transition-colors
+					{config.overflowBehavior === 'KeepOriginal' ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-55 hover:opacity-75'}"
 				onclick={() => update({ overflowBehavior: 'KeepOriginal' })}
 			>保留原名</button>
 			<button
-				class="px-2 py-0.5 rounded text-[10px] transition-colors
-					{config.overflowBehavior === 'Skip' ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-50 hover:opacity-70'}"
+				class="px-2 py-0.5 rounded text-[11px] transition-colors
+					{config.overflowBehavior === 'Skip' ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-55 hover:opacity-75'}"
 				onclick={() => update({ overflowBehavior: 'Skip' })}
 			>跳过</button>
 			<button
-				class="px-2 py-0.5 rounded text-[10px] transition-colors
-					{config.overflowBehavior === 'Cycle' ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-50 hover:opacity-70'}"
+				class="px-2 py-0.5 rounded text-[11px] transition-colors
+					{config.overflowBehavior === 'Cycle' ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-55 hover:opacity-75'}"
 				onclick={() => update({ overflowBehavior: 'Cycle' })}
 			>循环</button>
 		</div>

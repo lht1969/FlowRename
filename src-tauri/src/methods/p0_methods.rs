@@ -247,72 +247,9 @@ impl Method for NewNameMethodAdapter {
     fn method_type(&self) -> MethodType { MethodType::NewName }
 
     fn apply(&self, _input: &str, context: &MethodContext) -> Result<String> {
-        let mut result = self.config.template.clone();
-
-        // Replace <Name> with original name (without extension)
-        result = result.replace("<Name>", &context.original_name);
-
-        // Replace <Ext> with original extension (with dot)
-        result = result.replace("<Ext>", &context.original_ext);
-
-        // Replace <Index> with 1-based file index
-        result = result.replace("<Index>", &format!("{}", context.file_index + 1));
-
-        // Replace <Inc:N> with zero-padded incrementing number
-        if let Some(inc_match) = regex::Regex::new(r"<Inc:(\d+)(?::(\d+))?>")
-            .ok()
-            .and_then(|re| re.find(&self.config.template))
-        {
-            let tag = inc_match.as_str();
-            let inner = &tag[5..tag.len()-1]; // Strip <Inc: and >
-            let parts: Vec<&str> = inner.split(':').collect();
-            
-            let padding: usize = parts[0].parse().unwrap_or(3);
-            let start: usize = if parts.len() > 1 { parts[1].parse().unwrap_or(1) } else { 1 };
-            
-            let number = start + context.file_index;
-            result = result.replace(tag, &format!("{:0>width$}", number, width = padding));
-        }
-
-        // Replace <Cnt:N> with total file count (zero-padded)
-        if let Some(cnt_match) = regex::Regex::new(r"<Cnt:(\d+)>")
-            .ok()
-            .and_then(|re| re.find(&self.config.template))
-        {
-            let tag = cnt_match.as_str();
-            let padding: usize = tag[5..tag.len()-1].parse().unwrap_or(3);
-            result = result.replace(tag, &format!("{:0>width$}", context.total_files, width = padding));
-        }
-
-        // Replace <Date:...> with current date
-        if let Some(date_match) = regex::Regex::new(r"<Date:([^>]+)>")
-            .ok()
-            .and_then(|re| re.find(&self.config.template))
-        {
-            let tag = date_match.as_str();
-            let format_str = &tag[6..tag.len()-1];
-            let now = chrono::Local::now();
-            let formatted = crate::methods::p1_methods::convert_chrono_format_pub(
-                format_str, &now.naive_local()
-            );
-            result = result.replace(tag, &formatted);
-        }
-
-        // Replace <Time:...> with current time
-        if let Some(time_match) = regex::Regex::new(r"<Time:([^>]+)>")
-            .ok()
-            .and_then(|re| re.find(&self.config.template))
-        {
-            let tag = time_match.as_str();
-            let format_str = &tag[6..tag.len()-1];
-            let now = chrono::Local::now();
-            let formatted = crate::methods::p1_methods::convert_chrono_format_pub(
-                format_str, &now.naive_local()
-            );
-            result = result.replace(tag, &formatted);
-        }
-
-        Ok(result)
+        use crate::tag_system::TagEvaluator;
+        let evaluator = TagEvaluator::new();
+        evaluator.evaluate_template(&self.config.template, context)
     }
 
     fn validate(&self) -> Result<()> {

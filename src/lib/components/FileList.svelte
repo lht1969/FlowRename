@@ -3,6 +3,8 @@
 	import { filesStore, previewStore, loadingStore, statusMessageStore } from '$lib/stores/app';
 	import { scanDirectory, scanFiles, clearFiles } from '$lib/commands';
 	import { currentDirStore, recursiveStore, extensionFilterStore } from '$lib/stores/app';
+	import { detectFileCategories } from '$lib/stores/fileCategories';
+	import { compareFileName } from '$lib/utils/sort';
 	import type { FileItem, FilePreviewItem } from '$lib/types';
 
 	let files = $derived($filesStore);
@@ -36,7 +38,7 @@
 		arr.sort((a, b) => {
 			switch (sortField) {
 				case 'name':
-					return dir * a.originalName.localeCompare(b.originalName);
+					return dir * compareFileName(a.originalName, b.originalName);
 				case 'size':
 					return dir * (a.fileSize - b.fileSize);
 				case 'modified':
@@ -90,6 +92,7 @@
 				statusMessageStore.set('扫描失败: ' + result.error);
 			} else {
 				filesStore.set(result.files);
+				detectFileCategories(result.files);
 				statusMessageStore.set(`已加载 ${result.totalCount} 个文件`);
 			}
 		} catch (e) {
@@ -126,6 +129,7 @@
 				statusMessageStore.set('加载失败: ' + result.error);
 			} else {
 				filesStore.set(result.files);
+				detectFileCategories(result.files);
 				statusMessageStore.set(`已加载 ${result.totalCount} 个文件`);
 			}
 		} catch (e) {
@@ -140,6 +144,7 @@
 		await clearFiles();
 		filesStore.set([]);
 		previewStore.set([]);
+		detectFileCategories([]);
 		statusMessageStore.set('就绪');
 	}
 
@@ -232,20 +237,20 @@
 
 		<!-- 当前目录路径 -->
 		{#if currentDir}
-			<span class="text-xs opacity-50 adr-truncate flex-1" title={currentDir}>
+			<span class="text-xs opacity-55 adr-truncate flex-1" title={currentDir}>
 				{currentDir}
 			</span>
 		{/if}
 
 		<!-- 递归选项 -->
-		<label class="flex items-center gap-1 text-xs opacity-60 cursor-pointer">
+		<label class="flex items-center gap-1 text-xs opacity-65 cursor-pointer">
 			<input type="checkbox" bind:checked={$recursiveStore} class="w-3 h-3" />
 			递归
 		</label>
 
 		<!-- 扩展名过滤 -->
 		<button
-			class="p-1 rounded hover:bg-surface-500/20 transition-colors opacity-50 hover:opacity-70"
+			class="p-1 rounded hover:bg-surface-500/20 transition-colors opacity-60 hover:opacity-80"
 			onclick={() => showExtFilter = !showExtFilter}
 			title="扩展名过滤"
 		>
@@ -257,7 +262,7 @@
 		<!-- 清空按钮 -->
 		{#if files.length > 0}
 			<button
-				class="p-1 rounded hover:bg-surface-500/20 transition-colors opacity-40 hover:opacity-70"
+				class="p-1 rounded hover:bg-surface-500/20 transition-colors opacity-50 hover:opacity-75"
 				onclick={handleClear}
 				title="清空列表"
 			>
@@ -271,7 +276,7 @@
 	<!-- 扩展名过滤条 -->
 	{#if showExtFilter}
 		<div class="flex items-center gap-2 px-3 py-1.5 border-b border-surface-500/10 bg-surface-500/5">
-			<span class="text-xs opacity-40">扩展名:</span>
+			<span class="text-xs opacity-50">扩展名:</span>
 			<input
 				type="text"
 				class="flex-1 bg-surface-500/10 border border-surface-500/20 rounded px-2 py-0.5 text-xs
@@ -281,14 +286,14 @@
 				oninput={(e) => extFilterInput = (e.target as HTMLInputElement).value}
 				onkeydown={(e) => { if (e.key === 'Enter') applyExtFilter(); }}
 			/>
-			<button class="text-xs text-blue-400/70 hover:text-blue-400" onclick={applyExtFilter}>应用</button>
-			<button class="text-xs opacity-40 hover:opacity-70" onclick={clearExtFilter}>清除</button>
+			<button class="text-xs text-blue-300/80 hover:text-blue-300" onclick={applyExtFilter}>应用</button>
+			<button class="text-xs opacity-50 hover:opacity-70" onclick={clearExtFilter}>清除</button>
 		</div>
 	{/if}
 
 	<!-- 文件列表 -->
 	{#if files.length === 0}
-		<div class="flex-1 flex flex-col items-center justify-center opacity-30 text-center px-8">
+		<div class="flex-1 flex flex-col items-center justify-center opacity-55 text-center px-8">
 			<svg class="w-12 h-12 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
 				<path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
 			</svg>
@@ -297,8 +302,9 @@
 		</div>
 	{:else}
 		<!-- 固定表头（在滚动区域外） -->
-		<div class="adr-table-header grid grid-cols-[1fr_80px_1fr] gap-2 px-3 py-1.5
-			text-xs font-medium opacity-60 border-b border-surface-500/20 bg-surface-300 shrink-0">
+		<div class="adr-table-header grid grid-cols-[32px_1fr_70px_1fr] gap-2 px-3 py-1.5
+			text-xs font-medium opacity-60 border-b border-surface-500/20 bg-surface-300/50 shrink-0">
+			<span class="text-center">#</span>
 			<button class="text-left hover:opacity-100 transition-opacity" onclick={() => toggleSort('name')}>
 				原始名称{sortIndicator('name')}
 			</button>
@@ -313,29 +319,34 @@
 			{#each sortedFiles() as file, index (file.id)}
 				{@const previewItem = previewMap.get(file.originalPath)}
 				<div
-					class="adr-file-row grid grid-cols-[1fr_80px_1fr] gap-2 px-3 py-1.5 text-xs
-						border-b border-surface-500/5 hover:bg-surface-500/10 transition-colors
+					class="adr-file-row grid grid-cols-[32px_1fr_70px_1fr] gap-2 px-3 py-1.5 text-xs
+						border-b border-surface-500/5 transition-all duration-[var(--adr-transition-fast)]
+						hover:bg-surface-500/10 hover:pl-[11px] hover:border-l-[3px] hover:border-l-blue-500/40
+						{index % 2 === 1 ? 'bg-surface-500/[0.03]' : ''}
 						{getRowClass(previewItem)}"
 				>
+					<!-- 行号 -->
+					<span class="text-center opacity-30 text-[11px] select-none">{index + 1}</span>
+
 					<!-- 原始名称 -->
 					<span class="adr-truncate opacity-70" title={file.originalName + file.originalExt}>
-						{file.originalName}<span class="opacity-40">{file.originalExt}</span>
+						{file.originalName}<span class="opacity-50">{file.originalExt}</span>
 					</span>
 
 					<!-- 文件大小 -->
-					<span class="opacity-30">{formatSize(file.fileSize)}</span>
+					<span class="opacity-50">{formatSize(file.fileSize)}</span>
 
 					<!-- 预览名称 -->
 					{#if previewItem?.isChanged}
-						<span class="adr-truncate text-green-400/80" title={previewItem.newName}>
+						<span class="adr-truncate text-green-600/80 dark:text-green-400/80" title={previewItem.newName}>
 							{previewItem.newName}
 						</span>
 					{:else if previewItem?.hasConflict}
-						<span class="adr-truncate text-amber-400/80" title="冲突: {previewItem.newName}">
+						<span class="adr-truncate text-amber-600/80 dark:text-amber-400/80" title="冲突: {previewItem.newName}">
 							⚠ {previewItem.newName}
 						</span>
 					{:else}
-						<span class="adr-truncate opacity-20">—</span>
+						<span class="adr-truncate opacity-30">—</span>
 					{/if}
 				</div>
 			{/each}
@@ -345,7 +356,7 @@
 
 <style>
 	.adr-file-list {
-		background: var(--color-surface-400);
+		background: var(--color-surface-50);
 	}
 
 	.adr-btn-primary:disabled {

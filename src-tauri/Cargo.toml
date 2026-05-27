@@ -26,8 +26,14 @@ kamadak-exif = { workspace = true }
 # Audio metadata (ID3)
 id3 = { workspace = true }
 
+# Video metadata (MP4 container parsing)
+mp4parse = { workspace = true }
+
 # App directories (data, config, cache)
 dirs = "5"
+
+# Pinyin support for Chinese character sorting
+pinyin = "0.4"
 
 [dev-dependencies]
 tempfile = "3"

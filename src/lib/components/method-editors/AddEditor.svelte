@@ -15,12 +15,12 @@
 <div class="space-y-2 text-xs">
 	<!-- 添加文本 -->
 	<div class="flex items-center gap-2">
-		<label for="add-text" class="w-12 opacity-50 shrink-0">文本</label>
+		<label for="add-text" class="w-14 text-xs opacity-60 shrink-0">文本</label>
 		<input
 			id="add-text"
 			type="text"
 			class="flex-1 bg-surface-500/10 border border-surface-500/20 rounded px-2 py-1 text-xs
-				focus:outline-none focus:border-blue-500/50 transition-colors"
+				focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-colors"
 			placeholder="要添加的文本"
 			value={config.text}
 			oninput={(e) => update({ text: (e.target as HTMLInputElement).value })}
@@ -29,11 +29,11 @@
 
 	<!-- 插入位置 -->
 	<div class="flex items-center gap-2">
-		<label for="add-position" class="w-12 opacity-50 shrink-0">位置</label>
+		<label for="add-position" class="w-14 text-xs opacity-60 shrink-0">位置</label>
 		<select
 			id="add-position"
 			class="flex-1 bg-surface-500/10 border border-surface-500/20 rounded px-2 py-1 text-xs
-				focus:outline-none focus:border-blue-500/50"
+				focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20"
 			value={typeof config.position === 'string' ? config.position : 'Custom'}
 			onchange={(e) => {
 				const val = (e.target as HTMLSelectElement).value;
@@ -53,7 +53,7 @@
 	<!-- 自定义位置 -->
 	{#if typeof config.position === 'object' && 'Custom' in config.position}
 		<div class="flex items-center gap-2">
-			<label for="add-custom-index" class="w-12 opacity-50 shrink-0">索引</label>
+			<label for="add-custom-index" class="w-14 text-xs opacity-60 shrink-0">索引</label>
 			<input
 				id="add-custom-index"
 				type="number"
@@ -69,18 +69,18 @@
 	<!-- 选项行 -->
 	<div class="flex items-center gap-3 pt-1">
 		<label class="flex items-center gap-1 cursor-pointer opacity-60 hover:opacity-80 transition-opacity">
-			<input type="checkbox" checked={config.backwards} onchange={() => update({ backwards: !config.backwards })} class="w-3 h-3" />
+			<input type="checkbox" checked={config.backwards} onchange={() => update({ backwards: !config.backwards })} class="w-3.5 h-3.5 rounded border-surface-500/30 text-blue-500 focus:ring-blue-500/30 focus:ring-offset-0" />
 			<span>从末尾计数</span>
 		</label>
 	</div>
 
 	<!-- 应用目标 -->
 	<div class="flex items-center gap-2">
-		<span class="w-12 opacity-50 shrink-0">应用</span>
+		<span class="w-14 text-xs opacity-60 shrink-0">应用</span>
 		<div class="flex gap-1">
 			{#each ['Name', 'Extension', 'Both'] as target}
 				<button
-					class="px-2 py-0.5 rounded text-[10px] transition-colors {config.applyTo === target ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-50 hover:opacity-70'}"
+					class="px-2 py-0.5 rounded text-[11px] transition-colors {config.applyTo === target ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-55 hover:opacity-75'}"
 					onclick={() => update({ applyTo: target as 'Name' | 'Extension' | 'Both' })}
 				>
 					{target === 'Name' ? '文件名' : target === 'Extension' ? '扩展名' : '全部'}

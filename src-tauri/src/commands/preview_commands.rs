@@ -2,9 +2,8 @@ use serde::{Deserialize, Serialize};
 use tauri::State;
 
 use crate::commands::file_commands::AppState;
-use crate::method_engine::{Pipeline, MethodContext};
+use crate::method_engine::{Pipeline, MethodContext, sanitize_filename};
 use crate::models::method_config::MethodConfig;
-use crate::tag_system::TagEvaluator;
 
 /// Request structure for previewing rename operations
 #[derive(Debug, Serialize, Deserialize)]
@@ -135,7 +134,6 @@ pub async fn preview_rename(
         }
     }
     
-    let evaluator = TagEvaluator::new();
     let mut preview_items: Vec<FilePreviewItem> = Vec::new();
     let mut changed_count = 0;
     let total_files = files.len();
@@ -158,19 +156,10 @@ pub async fn preview_rename(
         // For ApplyToName case, pipeline gets template result (stem) but with ext context
         let full_original = format!("{}{}", file.original_name, file.original_ext);
 
-        // Apply template if provided (for NewName method) - this is the stem/target name
-        let _template_result = if let Some(ref template) = request.template {
-            match evaluator.evaluate_template(template, &context) {
-                Ok(result) => result,
-                Err(_) => file.original_name.clone(),
-            }
-        } else {
-            file.original_name.clone()
-        };
-
         // Pipeline receives full original name so it can apply methods to name/ext/both appropriately
+        // Pipeline 执行后清理文件名中的非法字符
         let new_name = match pipeline.execute(&full_original, &context) {
-            Ok(name) => name,
+            Ok(name) => sanitize_filename(&name),
             Err(_) => full_original.clone(),
         };
 

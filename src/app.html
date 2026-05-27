@@ -18,12 +18,9 @@
     <script>
       (function () {
         var stored = localStorage.getItem("adr-theme");
-        var themes = [
-          "modern",
-          "wintry",
-          "obsidian",
-        ];
-        var theme = stored && themes.indexOf(stored) !== -1 ? stored : "modern";
+        var themes = ["modern", "wintry", "obsidian", "daylight"];
+        var theme =
+          stored && themes.indexOf(stored) !== -1 ? stored : "daylight";
         document.body.setAttribute("data-theme", theme);
       })();
     </script>

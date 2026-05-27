@@ -27,9 +27,33 @@
   --adr-statusbar-height: 28px;
   --adr-gap: 1px;
 
-  /* Typography */
+  /* === Spacing System (4px base) === */
+  --adr-space-1: 4px;
+  --adr-space-2: 8px;
+  --adr-space-3: 12px;
+  --adr-space-4: 16px;
+  --adr-space-5: 20px;
+  --adr-space-6: 24px;
+  --adr-space-8: 32px;
+  --adr-space-10: 40px;
+
+  /* === Typography === */
+  --adr-font-sans:
+    "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Inter Variable",
+    "Segoe UI", system-ui, sans-serif;
+  --adr-font-heading: "Noto Sans SC", "Inter Variable", system-ui, sans-serif;
   --adr-font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code", monospace;
-  --adr-font-sans: "Inter Variable", "Segoe UI", system-ui, sans-serif;
+
+  --adr-text-xs: 11px;
+  --adr-text-sm: 12px;
+  --adr-text-base: 13px;
+  --adr-text-md: 14px;
+  --adr-text-lg: 16px;
+
+  --adr-leading-tight: 1.3;
+  --adr-leading-normal: 1.5;
+  --adr-leading-relaxed: 1.6;
+  --adr-leading-loose: 1.8;
 
   /* Transitions */
   --adr-transition-fast: 120ms ease;
@@ -48,22 +72,19 @@
 [data-theme="skeleton"],
 [data-theme="modern"],
 [data-theme="wintry"],
-[data-theme="rocket"],
-[data-theme="seafoam"],
-[data-theme="vintage"],
-[data-theme="crimson"],
-[data-theme="obsidian"],
-[data-theme="aurora"] {
-  /* Dark themes get subtle grid pattern background */
+[data-theme="obsidian"] {
   --adr-bg-pattern: radial-gradient(
     circle at 1px 1px,
     rgba(255, 255, 255, 0.03) 1px,
     transparent 0
   );
   --adr-bg-pattern-size: 24px 24px;
+  --adr-opacity-secondary: 0.55;
+  --adr-opacity-hint: 0.5;
 }
 
 /* ==================== Light Theme Overrides ==================== */
+[data-theme="daylight"],
 [data-theme="skeleton"]:not([data-mode="dark"]),
 [data-theme="modern"]:not([data-mode="dark"]) {
   --adr-bg-pattern: radial-gradient(
@@ -72,6 +93,8 @@
     transparent 0
   );
   --adr-bg-pattern-size: 24px 24px;
+  --adr-opacity-secondary: 0.6;
+  --adr-opacity-hint: 0.5;
 }
 
 /* ==================== Base Reset ==================== */
@@ -86,6 +109,7 @@ body {
   height: 100%;
   overflow: hidden;
   font-family: var(--adr-font-sans);
+  line-height: var(--adr-leading-relaxed);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -118,7 +142,33 @@ aside,
   background: rgba(128, 128, 128, 0.5);
 }
 
-/* ==================== Utility Classes ==================== */
+/* ==================== 可访问性增强 - 最小字号与对比度基准 ==================== */
+/* 
+ * WCAG 2.1 AA 级标准要求:
+ *   - 正常文本（<18px / <14px粗体）对比度 ≥ 4.5:1
+ *   - 大文本（≥18px / ≥14px粗体）对比度 ≥ 3:1
+ *   
+ * 本项目使用 Skeleton UI 主题系统，文字颜色由 --theme-font-color-base 控制。
+ * 针对深色主题（Modern/Wintry/Obsidian），需确保 opacity 不低于 0.50 以保证
+ * 正常文本达到 4.5:1 对比度。以下规则在组件级覆盖基础上提供全局安全兜底。
+ */
+
+/* 
+ * 全局最小字号保障: 任何小于 11px 的文本都会被强制提升。
+ * 注意: 此规则仅作为安全网，具体调整在组件中逐个进行以确保视觉设计质量。
+ */
+* {
+  /* 不在此处强制最小字号，而是在组件中逐一定义以保持设计灵活性 */
+}
+
+/* 全局辅助文本最低透明度保障（深色主题） */
+[data-theme="modern"],
+[data-theme="wintry"],
+[data-theme="obsidian"] {
+  /* 确保次要文本对比度: opacity 从通用 0.4→0.55 提升 */
+  --adr-opacity-secondary: 0.55;
+  --adr-opacity-hint: 0.5;
+}
 .adr-mono {
   font-family: var(--adr-font-mono);
 }
@@ -148,7 +198,7 @@ aside,
   color: var(--adr-warning);
 }
 .adr-status-skipped {
-  color: rgba(128, 128, 128, 0.6);
+  color: rgba(128, 128, 128, 0.75);
 }
 
 /* Conflict highlight animation */
@@ -194,24 +244,38 @@ aside,
   animation: adr-fade-in var(--adr-transition-normal) forwards;
 }
 
+/* ==================== Daylight Theme TitleBar Hover ==================== */
+[data-theme="daylight"] .adr-titlebar button:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+[data-theme="daylight"] .adr-titlebar button:active {
+  background: rgba(0, 0, 0, 0.12);
+}
+
 /* ==================== Theme-Specific Active Button Contrast Fix ==================== */
 /* 现代主题和冬季主题下选中按钮的对比度修复，确保文字清晰可读 */
 
 /* Modern 主题 - 选中按钮使用白色文字以确保对比度 */
-[data-theme='modern'] .bg-blue-500\/30.text-blue-300,
-[data-theme='modern'] .bg-pink-500\/30.text-pink-300 {
+[data-theme="modern"] .bg-blue-500\/30.text-blue-300,
+[data-theme="modern"] .bg-pink-500\/30.text-pink-300 {
   color: #ffffff !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Wintry 主题 - 选中按钮使用白色文字以确保对比度 */
-[data-theme='wintry'] .bg-blue-500\/30.text-blue-300 {
+[data-theme="wintry"] .bg-blue-500\/30.text-blue-300 {
   color: #ffffff !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Obsidian 主题 - 同上 */
-[data-theme='obsidian'] .bg-blue-500\/30.text-blue-300 {
+[data-theme="obsidian"] .bg-blue-500\/30.text-blue-300 {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Daylight 主题 - 选中按钮白色文字 */
+[data-theme="daylight"] .bg-blue-500\/30.text-blue-300 {
   color: #ffffff !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }

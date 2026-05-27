@@ -30,12 +30,12 @@
 <div class="space-y-2 text-xs">
 	<!-- 时间戳来源 -->
 	<div class="flex items-center gap-2">
-		<span class="w-12 opacity-50 shrink-0">来源</span>
+		<span class="w-14 text-xs opacity-60 shrink-0">来源</span>
 		<div class="flex gap-1">
 			{#each SOURCE_OPTIONS as opt}
 				<button
-					class="px-2 py-0.5 rounded text-[10px] transition-colors
-						{config.source === opt.value ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-50 hover:opacity-70'}"
+					class="px-2 py-0.5 rounded text-[11px] transition-colors
+						{config.source === opt.value ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-55 hover:opacity-75'}"
 					onclick={() => update({ source: opt.value })}
 				>{opt.label}</button>
 			{/each}
@@ -62,8 +62,8 @@
 	<div class="flex flex-wrap gap-1">
 		{#each FORMAT_PRESETS as preset}
 			<button
-				class="px-1.5 py-0.5 rounded text-[10px] bg-surface-500/10 hover:bg-surface-500/20
-					transition-colors opacity-50 hover:opacity-80 adr-mono
+				class="px-1.5 py-0.5 rounded text-[11px] bg-surface-500/10 hover:bg-surface-500/20
+					transition-colors opacity-55 hover:opacity-80 adr-mono
 					{config.format === preset.format ? 'ring-1 ring-blue-500/30 opacity-80' : ''}"
 				onclick={() => update({ format: preset.format })}
 				title={preset.example}
@@ -75,8 +75,8 @@
 
 	<!-- 格式说明 -->
 	<div class="px-2 py-1.5 rounded bg-surface-500/5 border border-surface-500/10">
-		<p class="opacity-30 text-[10px] leading-relaxed">
-			YYYY=年 MM=月 DD=日 HH=时 mm=分 ss=秒
+		<p class="opacity-50 text-[11px] leading-relaxed">
+				YYYY=年 MM=月 DD=日 HH=时 mm=分 ss=秒
 		</p>
 	</div>
 </div>

@@ -11,6 +11,8 @@
 	} from '$lib/stores/app';
 	import { previewRename, executeRename, undoLastRename, getUndoStatus } from '$lib/commands';
 	import type { RenameItem } from '$lib/types';
+	import TagPanel from '$lib/components/TagPanel.svelte';
+	import { detectFileCategories } from '$lib/stores/fileCategories';
 	import { onMount } from 'svelte';
 
 	let files = $derived($filesStore);
@@ -36,12 +38,7 @@
 	/** 进度状态 */
 	let progress = $state<{ current: number; total: number; phase: string } | null>(null);
 
-	/** 执行按钮的动态 class */
-	let executeBtnClass = $derived(
-		canExecute
-			? 'adr-execute-active flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed'
-			: 'adr-execute-inactive flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed'
-	);
+	/** 进度百分比 */
 
 	/** 进度百分比 */
 	let progressPercent = $derived(
@@ -109,6 +106,7 @@
 				hasUndoHistory = true;
 				filesStore.set([]);
 				previewStore.set([]);
+				detectFileCategories([]);
 			}
 		} catch (e) {
 			statusMessageStore.set('执行异常: ' + String(e));
@@ -148,7 +146,7 @@
 	<div class="flex items-center justify-between px-3 py-2 border-b border-surface-500/20">
 		<h2 class="text-sm font-semibold opacity-80">操作</h2>
 		{#if hasUndoHistory}
-			<span class="text-[10px] opacity-40 bg-green-500/10 text-green-400/60 px-1.5 py-0.5 rounded">可撤销</span>
+			<span class="text-[11px] opacity-55 bg-green-500/10 text-green-300/80 px-1.5 py-0.5 rounded">可撤销</span>
 		{/if}
 	</div>
 
@@ -156,8 +154,8 @@
 	{#if progress}
 		<div class="px-3 py-2 border-b border-surface-500/10">
 			<div class="flex items-center justify-between text-xs mb-1">
-				<span class="opacity-50">{progress.phase}中...</span>
-				<span class="opacity-40">{progress.current}/{progress.total}</span>
+				<span class="opacity-55">{progress.phase}中...</span>
+				<span class="opacity-50">{progress.current}/{progress.total}</span>
 			</div>
 			<div class="w-full h-1.5 bg-surface-500/10 rounded-full overflow-hidden">
 				<div
@@ -172,9 +170,9 @@
 	<div class="flex flex-col gap-2 px-3 py-3">
 		<!-- 预览按钮 -->
 		<button
-			class="adr-action-btn flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium rounded-lg
+			class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium rounded-lg
 				bg-blue-500/90 hover:bg-blue-500 text-white transition-all
-				disabled:opacity-30 disabled:cursor-not-allowed"
+				disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98]"
 			onclick={handlePreview}
 			disabled={loading || methods.length === 0 || files.length === 0}
 		>
@@ -187,7 +185,11 @@
 
 		<!-- 执行按钮 -->
 		<button
-			class={executeBtnClass}
+			class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium rounded-lg transition-all
+				disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98]
+				{canExecute
+					? 'bg-emerald-500/90 hover:bg-emerald-500 text-white'
+					: 'bg-surface-500/10 opacity-40'}"
 			onclick={handleExecute}
 			disabled={!canExecute || loading}
 		>
@@ -199,9 +201,11 @@
 
 		<!-- 撤销按钮 -->
 		<button
-			class="adr-undo-btn flex items-center justify-center gap-2 w-full px-4 py-2 text-xs font-medium rounded-lg
-				transition-all disabled:opacity-20 disabled:cursor-not-allowed
-				{hasUndoHistory ? 'bg-amber-500/15 text-amber-400/80 hover:bg-amber-500/25 border border-amber-500/20' : 'bg-surface-500/5 opacity-30'}"
+			class="flex items-center justify-center gap-2 w-full px-4 py-2 text-sm font-medium rounded-lg
+				transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98]
+				{hasUndoHistory
+					? 'bg-amber-500/15 text-amber-600 dark:text-amber-400/80 hover:bg-amber-500/25 border border-amber-500/20'
+					: 'bg-surface-500/5 opacity-30'}"
 			onclick={handleUndo}
 			disabled={!hasUndoHistory || loading}
 		>
@@ -221,17 +225,17 @@
 					<span class="opacity-50">总文件数</span>
 					<span>{stats.total}</span>
 				</div>
-				<div class="flex justify-between text-green-400/80">
+				<div class="flex justify-between text-green-600/80 dark:text-green-400/80">
 					<span>将重命名</span>
 					<span>{stats.changed}</span>
 				</div>
 				{#if stats.conflicts > 0}
-					<div class="flex justify-between text-amber-400/80">
+					<div class="flex justify-between text-amber-600/80 dark:text-amber-400/80">
 						<span>冲突</span>
 						<span>{stats.conflicts}</span>
 					</div>
 				{/if}
-				<div class="flex justify-between opacity-40">
+				<div class="flex justify-between opacity-50">
 					<span>不变</span>
 					<span>{stats.unchanged}</span>
 				</div>
@@ -245,26 +249,11 @@
 		</div>
 	{/if}
 
-	<!-- 标签参考 -->
-	<div class="flex-1 overflow-y-auto px-3 py-2 border-t border-surface-500/20">
-		<h3 class="text-xs font-medium opacity-50 mb-2">标签参考</h3>
-		<div class="space-y-1 text-xs">
-			{#each [
-				{ tag: '<Name>', desc: '原始文件名' },
-				{ tag: '<Ext>', desc: '文件扩展名' },
-				{ tag: '<Index>', desc: '文件序号' },
-				{ tag: '<Date:YYYY>', desc: '当前年份' },
-				{ tag: '<Date:YYYYMMDD>', desc: '当前日期' },
-				{ tag: '<Time:HHmmss>', desc: '当前时间' },
-				{ tag: '<Inc:3>', desc: '递增序号(3位)' },
-				{ tag: '<Inc:3:100>', desc: '从100开始(3位)' },
-				{ tag: '<Cnt:3>', desc: '总文件数(3位)' },
-			] as ref}
-				<div class="flex items-center gap-2">
-					<code class="adr-mono text-blue-400/70 bg-surface-500/10 px-1 py-0.5 rounded text-[10px]">{ref.tag}</code>
-					<span class="opacity-40">{ref.desc}</span>
-				</div>
-			{/each}
+	<!-- 标签参考面板 -->
+	<div class="flex-1 overflow-hidden px-3 py-2 border-t border-surface-500/20 flex flex-col">
+		<h3 class="text-xs font-medium opacity-50 mb-1 shrink-0">标签参考</h3>
+		<div class="flex-1 overflow-hidden">
+			<TagPanel onInsertTag={() => {}} />
 		</div>
 	</div>
 </aside>
@@ -276,25 +265,5 @@
 		min-width: var(--adr-panel-width);
 	}
 
-	.adr-action-btn:active:not(:disabled) {
-		transform: scale(0.98);
-	}
 
-	.adr-execute-active {
-		background: rgba(16, 185, 129, 0.9);
-		color: white;
-	}
-
-	.adr-execute-active:hover {
-		background: rgb(16, 185, 129);
-	}
-
-	.adr-execute-inactive {
-		background: rgba(128, 128, 128, 0.15);
-		color: rgba(128, 128, 128, 0.5);
-	}
-
-	.adr-undo-btn:active:not(:disabled) {
-		transform: scale(0.98);
-	}
 </style>

@@ -16,16 +16,16 @@
 		{#if loading}
 			<div class="adr-spinner w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
 		{/if}
-		<span class="opacity-60">{message}</span>
+		<span class="opacity-65">{message}</span>
 	</div>
 
 	<!-- 右侧：文件统计 -->
-	<div class="flex items-center gap-3 opacity-50">
+	<div class="flex items-center gap-3 opacity-55">
 		{#if stats.total > 0}
 			<span>共 {stats.total} 个文件</span>
-			<span class="text-green-400/70">√ {stats.changed} 变更</span>
+			<span class="text-green-600/80 dark:text-green-300/80">√ {stats.changed} 变更</span>
 			{#if stats.conflicts > 0}
-				<span class="text-amber-400/80">⚠ {stats.conflicts} 冲突</span>
+				<span class="text-amber-600/80 dark:text-amber-300/90">⚠ {stats.conflicts} 冲突</span>
 			{/if}
 		{/if}
 	</div>

@@ -1,6 +1,8 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
+use super::video_metadata::VideoMetadata;
+
 /// Container for all types of file metadata
 /// Holds both basic filesystem attributes and extended media-specific metadata
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -20,6 +22,11 @@ pub struct FileMetadata {
     /// None for non-audio files or when not yet extracted
     #[serde(skip_serializing_if = "Option::is_none")]
     pub audio: Option<AudioMetadata>,
+
+    /// 视频文件元数据（MP4, MKV, AVI 等）
+    /// None 表示非视频文件或尚未提取
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub video: Option<VideoMetadata>,
 }
 
 impl Default for FileMetadata {
@@ -30,6 +37,7 @@ impl Default for FileMetadata {
             is_system: false,
             image: None,
             audio: None,
+            video: None,
         }
     }
 }
@@ -89,6 +97,12 @@ pub struct AudioMetadata {
 
     /// Music genre (e.g., "Pop", "Rock", "Classical")
     pub genre: Option<String>,
+
+    /// 碟片号（专辑中的第几张碟）
+    pub disc_number: Option<u16>,
+
+    /// 总碟片数
+    pub total_discs: Option<u16>,
 
     /// Duration in seconds
     pub duration: Option<u32>,

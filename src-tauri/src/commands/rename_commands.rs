@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use crate::method_engine::sanitize_filename;
 use tauri::State;
 use std::fs;
 use std::path::Path;
@@ -176,7 +177,9 @@ pub async fn execute_rename(
         
         // Build target path (same directory, new filename)
         if let Some(parent) = source_path.parent() {
-            let target_path = parent.join(&item.new_name);
+            // 清理文件名中的非法字符（二次安全防护）
+            let safe_name = sanitize_filename(&item.new_name);
+            let target_path = parent.join(&safe_name);
             
             // Check if target already exists
             if target_path.exists() && target_path != source_path {

@@ -1,5 +1,6 @@
 // Tag System module - handles dynamic filename generation with tags
-// Supports 5 categories: Basic, Timestamp, Sequence, EXIF, ID3
+// Supports 4 categories: Basic/Timestamp/Sequence, Image (Img), Video (Vid), Audio (Aud)
+// 旧标签名（Exif*/Id3*）保留为别名以确保向后兼容
 
 pub mod parser;
 pub mod evaluator;

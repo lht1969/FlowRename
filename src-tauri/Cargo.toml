@@ -32,8 +32,13 @@ mp4parse = { workspace = true }
 # App directories (data, config, cache)
 dirs = "5"
 
-# Pinyin support for Chinese character sorting
-pinyin = "0.4"
+# Windows API for Chinese character sorting (StrCmpLogicalW / CompareStringEx)
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = ["Win32_Globalization"] }
+
+# Unix locale-aware string comparison for Chinese character sorting
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
 
 [dev-dependencies]
 tempfile = "3"

@@ -308,7 +308,7 @@
 			<button class="text-left hover:opacity-100 transition-opacity" onclick={() => toggleSort('name')}>
 				原始名称{sortIndicator('name')}
 			</button>
-			<button class="text-left hover:opacity-100 transition-opacity" onclick={() => toggleSort('size')}>
+			<button class="text-right hover:opacity-100 transition-opacity" onclick={() => toggleSort('size')}>
 				大小{sortIndicator('size')}
 			</button>
 			<span>预览名称</span>
@@ -330,12 +330,12 @@
 					<span class="text-center opacity-30 text-[11px] select-none">{index + 1}</span>
 
 					<!-- 原始名称 -->
-					<span class="adr-truncate opacity-70" title={file.originalName + file.originalExt}>
+					<span class="adr-truncate opacity-80" title={file.originalName + file.originalExt}>
 						{file.originalName}<span class="opacity-50">{file.originalExt}</span>
 					</span>
 
 					<!-- 文件大小 -->
-					<span class="opacity-50">{formatSize(file.fileSize)}</span>
+					<span class="text-right opacity-50">{formatSize(file.fileSize)}</span>
 
 					<!-- 预览名称 -->
 					{#if previewItem?.hasConflict}
@@ -343,7 +343,7 @@
 							🚫 {previewItem.newName}
 						</span>
 					{:else if previewItem?.isChanged}
-						<span class="adr-truncate text-green-600/80 dark:text-green-400/80" title={previewItem.newName}>
+						<span class="adr-truncate adr-preview-changed" title={previewItem.newName}>
 							{previewItem.newName}
 						</span>
 					{:else}
@@ -388,5 +388,15 @@
 	@keyframes adr-conflict-pulse {
 		0%, 100% { background-color: rgba(239, 68, 68, 0.15); }
 		50% { background-color: rgba(239, 68, 68, 0.25); }
+	}
+
+	/* Obsidian 主题预览名称使用更亮的绿色 */
+	:global([data-theme="obsidian"]) .adr-preview-changed {
+		color: #4ade80 !important;
+	}
+
+	/* 其他浅色主题默认使用深绿色 */
+	.adr-preview-changed {
+		color: #0a5f56;
 	}
 </style>

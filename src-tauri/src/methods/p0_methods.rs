@@ -312,6 +312,25 @@ impl Method for AddMethod {
         // Split input into stem and extension
         let (name_part, ext_part) = split_name_ext(input, &context.original_ext);
 
+        // Extension part starts with '.', e.g. ".txt"
+        // When adding to extension, we want to add to the actual extension text (after the dot)
+        let ext_chars: Vec<char> = ext_part.chars().collect();
+        let has_dot = !ext_chars.is_empty() && ext_chars[0] == '.';
+        let actual_ext: String = if has_dot {
+            ext_chars.iter().skip(1).collect()
+        } else {
+            ext_part.clone()
+        };
+
+        // Reassemble extension with leading dot preserved
+        let reassemble_ext = |new_ext_content: &str| -> String {
+            if has_dot {
+                format!(".{}", new_ext_content)
+            } else {
+                new_ext_content.to_string()
+            }
+        };
+
         match &self.config.position {
             AddPosition::Start => {
                 match apply_to {
@@ -324,12 +343,12 @@ impl Method for AddMethod {
                         Ok(format!("{}{}", new_name, ext_part))
                     }
                     ApplyToOption::Extension => {
-                        let new_ext = if self.config.backwards {
-                            insert_at_end(&ext_part, text)
+                        let new_ext_content = if self.config.backwards {
+                            insert_at_end(&actual_ext, text)
                         } else {
-                            format!("{}{}", text, ext_part)
+                            format!("{}{}", text, &actual_ext)
                         };
-                        Ok(format!("{}{}", name_part, new_ext))
+                        Ok(format!("{}{}", name_part, reassemble_ext(&new_ext_content)))
                     }
                     ApplyToOption::Both => {
                         let new_full = if self.config.backwards {
@@ -352,12 +371,12 @@ impl Method for AddMethod {
                         Ok(format!("{}{}", new_name, ext_part))
                     }
                     ApplyToOption::Extension => {
-                        let new_ext = if self.config.backwards {
-                            insert_at_end(&ext_part, text)
+                        let new_ext_content = if self.config.backwards {
+                            insert_at_end(&actual_ext, text)
                         } else {
-                            format!("{}{}", ext_part, text)
+                            format!("{}{}", &actual_ext, text)
                         };
-                        Ok(format!("{}{}", name_part, new_ext))
+                        Ok(format!("{}{}", name_part, reassemble_ext(&new_ext_content)))
                     }
                     ApplyToOption::Both => {
                         let new_full = if self.config.backwards {
@@ -380,12 +399,13 @@ impl Method for AddMethod {
                         Ok(format!("{}{}", new_name, ext_part))
                     }
                     ApplyToOption::Extension => {
-                        let new_ext = if self.config.backwards {
-                            insert_at_end(&ext_part, text)
+                        // BeforeExt means before extension content, so same logic as Start
+                        let new_ext_content = if self.config.backwards {
+                            insert_at_end(&actual_ext, text)
                         } else {
-                            format!("{}{}", text, ext_part)
+                            format!("{}{}", text, &actual_ext)
                         };
-                        Ok(format!("{}{}", name_part, new_ext))
+                        Ok(format!("{}{}", name_part, reassemble_ext(&new_ext_content)))
                     }
                     ApplyToOption::Both => {
                          let new_full = if self.config.backwards {
@@ -409,12 +429,13 @@ impl Method for AddMethod {
                         Ok(format!("{}{}", name_part, text))
                     }
                     ApplyToOption::Extension => {
-                        let new_ext = if self.config.backwards {
-                            insert_at_end(&ext_part, text)
+                        // AfterExt means after extension content, so same logic as End
+                        let new_ext_content = if self.config.backwards {
+                            insert_at_end(&actual_ext, text)
                         } else {
-                            format!("{}{}", ext_part, text)
+                            format!("{}{}", &actual_ext, text)
                         };
-                        Ok(format!("{}{}", name_part, new_ext))
+                        Ok(format!("{}{}", name_part, reassemble_ext(&new_ext_content)))
                     }
                     ApplyToOption::Both => {
                         let new_full = if self.config.backwards {
@@ -438,13 +459,14 @@ impl Method for AddMethod {
                         Ok(format!("{}{}", new_name, ext_part))
                     }
                     ApplyToOption::Extension => {
-                        let new_ext = if self.config.backwards {
-                            let actual = ext_part.chars().count().saturating_sub(*pos);
-                            insert_at_pos(&ext_part, text, actual)
+                        // Custom position on actual extension content
+                        let new_ext_content = if self.config.backwards {
+                            let actual = actual_ext.chars().count().saturating_sub(*pos);
+                            insert_at_pos(&actual_ext, text, actual)
                         } else {
-                            insert_at_pos(&ext_part, text, *pos)
+                            insert_at_pos(&actual_ext, text, *pos)
                         };
-                        Ok(format!("{}{}", name_part, new_ext))
+                        Ok(format!("{}{}", name_part, reassemble_ext(&new_ext_content)))
                     }
                     ApplyToOption::Both => {
                         let new_full = if self.config.backwards {

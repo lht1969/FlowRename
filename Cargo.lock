@@ -9,34 +9,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
-name = "flowrename"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "chrono",
- "dirs 5.0.1",
- "env_logger",
- "id3",
- "kamadak-exif",
- "libc",
- "log",
- "mp4parse",
- "regex",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "tauri-plugin-shell",
- "tempfile",
- "thiserror 1.0.69",
- "tokio",
- "uuid",
- "walkdir",
- "windows 0.58.0",
-]
-
-[[package]]
 name = "ahash"
 version = "0.8.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -871,6 +843,34 @@ checksum = "843fba2746e448b37e26a819579957415c8cef339bf08564fe8b7ddbd959573c"
 dependencies = [
  "crc32fast",
  "miniz_oxide",
+]
+
+[[package]]
+name = "flowrename"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "dirs 5.0.1",
+ "env_logger",
+ "id3",
+ "kamadak-exif",
+ "libc",
+ "log",
+ "mp4parse",
+ "regex",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "tauri-plugin-shell",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tokio",
+ "uuid",
+ "walkdir",
+ "windows 0.58.0",
 ]
 
 [[package]]

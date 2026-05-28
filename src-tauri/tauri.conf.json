@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicoverbruggen/genitaur/main/schemas/latest/tauri-conf-schema.json",
-  "productName": "AdRename",
+  "productName": "FlowRename",
   "version": "1.0.0",
-  "identifier": "com.adrename.app",
+  "identifier": "com.flowrename.app",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "AdRename v1.0",
+        "title": "FlowRename v1.0",
         "width": 1280,
         "height": 720,
         "minWidth": 960,

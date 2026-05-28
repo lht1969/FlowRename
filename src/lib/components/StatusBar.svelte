@@ -1,4 +1,4 @@
-<!-- AdRename - StatusBar 组件（底部状态栏） -->
+<!-- FlowRename - StatusBar 组件（底部状态栏） -->
 <script lang="ts">
 	import { statsStore, statusMessageStore, loadingStore } from '$lib/stores/app';
 

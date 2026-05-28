@@ -1,4 +1,4 @@
-<!-- AdRename - MethodPanel 组件（左侧方法面板 - 含配置编辑器） -->
+<!-- FlowRename - MethodPanel 组件（左侧方法面板 - 含配置编辑器） -->
 <script lang="ts">
 	import { methodsStore } from '$lib/stores/app';
 	import type { MethodConfig } from '$lib/types';

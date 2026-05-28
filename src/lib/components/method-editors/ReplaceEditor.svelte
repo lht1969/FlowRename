@@ -1,4 +1,4 @@
-<!-- AdRename - ReplaceMethodEditor 替换方法配置编辑器 -->
+<!-- FlowRename - ReplaceMethodEditor 替换方法配置编辑器 -->
 <script lang="ts">
 	import type { ReplaceConfig } from '$lib/types';
 

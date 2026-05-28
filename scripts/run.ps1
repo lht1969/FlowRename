@@ -1,4 +1,4 @@
-# AdRename 执行脚本 - Windows
+# FlowRename 执行脚本 - Windows
 # 使用方式: .\scripts\run.ps1
 
 param(
@@ -12,7 +12,7 @@ $ProjectRoot = Split-Path -Parent $ScriptDir
 Set-Location $ProjectRoot
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  AdRename 执行脚本 (Windows)" -ForegroundColor Cyan
+Write-Host "  FlowRename 执行脚本 (Windows)" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

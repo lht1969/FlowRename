@@ -1,4 +1,4 @@
-<!-- AdRename - Root Layout -->
+<!-- FlowRename - Root Layout -->
 <script lang="ts">
 	import '../app.css';
 	import { themeStore } from '$lib/stores/theme';

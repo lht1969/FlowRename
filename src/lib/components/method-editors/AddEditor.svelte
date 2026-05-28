@@ -1,4 +1,4 @@
-<!-- AdRename - AddMethodEditor 添加方法配置编辑器 -->
+<!-- FlowRename - AddMethodEditor 添加方法配置编辑器 -->
 <script lang="ts">
 	import type { AddConfig } from '$lib/types';
 

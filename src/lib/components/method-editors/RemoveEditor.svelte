@@ -1,4 +1,4 @@
-<!-- AdRename - RemoveMethodEditor 删除方法配置编辑器 -->
+<!-- FlowRename - RemoveMethodEditor 删除方法配置编辑器 -->
 <script lang="ts">
 	import type { RemoveConfig } from '$lib/types';
 

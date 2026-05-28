@@ -1,4 +1,4 @@
-/* AdRename - Global Styles & Theme System */
+/* FlowRename - Global Styles & Theme System */
 
 @tailwind base;
 @tailwind components;
@@ -9,7 +9,7 @@
 /* and provide application-specific design tokens */
 
 :root {
-  /* Brand Colors - AdRename Identity */
+  /* Brand Colors - FlowRename Identity */
   --adr-brand: #3b82f6;
   --adr-brand-light: #60a5fa;
   --adr-brand-dark: #2563eb;

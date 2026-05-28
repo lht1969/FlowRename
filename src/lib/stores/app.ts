@@ -1,4 +1,4 @@
-// AdRename - Application state stores
+// FlowRename - Application state stores
 // Central state management for the rename workflow
 
 import { writable, derived, get } from "svelte/store";

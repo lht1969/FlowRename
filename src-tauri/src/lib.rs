@@ -1,4 +1,4 @@
-// AdRename Library - Main entry point for Tauri application
+// FlowRename Library - Main entry point for Tauri application
 // Implements the IPC bridge between Svelte frontend and Rust backend
 
 pub mod file_manager;
@@ -16,13 +16,13 @@ use commands::file_commands::AppState;
 use undo_manager::UndoManager;
 
 /// Get the app data directory for storing persistent data
-/// On Windows, this typically resolves to: C:\Users\<user>\AppData\Roaming\com.adrename.app
+/// On Windows, this typically resolves to: C:\Users\<user>\AppData\Roaming\com.flowrename.app
 fn get_app_data_dir() -> std::path::PathBuf {
     // Use a standard app data directory
     let base = dirs::data_dir().unwrap_or_else(|| {
         std::path::PathBuf::from(".")
     });
-    base.join("AdRename")
+    base.join("FlowRename")
 }
 
 /// Initialize and run the Tauri application
@@ -64,7 +64,7 @@ pub fn run() {
                 commands::rename_commands::get_undo_status,
             ])
             .setup(|app| {
-                log::info!("AdRename v1.0 initializing...");
+                log::info!("FlowRename v1.0 initializing...");
                 
                 #[cfg(debug_assertions)]
                 {
@@ -77,7 +77,7 @@ pub fn run() {
                 
                 let _ = app;
                 
-                log::info!("AdRename ready");
+                log::info!("FlowRename ready");
                 Ok(())
             })
             .run(tauri::generate_context!())
@@ -86,6 +86,6 @@ pub fn run() {
     
     #[cfg(test)]
     {
-        println!("AdRename v1.0 - Test mode (Tauri runtime disabled)");
+        println!("FlowRename v1.0 - Test mode (Tauri runtime disabled)");
     }
 }

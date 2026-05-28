@@ -1,5 +1,5 @@
 #!/bin/bash
-# AdRename 执行脚本 - Linux/macOS
+# FlowRename 执行脚本 - Linux/macOS
 # 使用方式: ./scripts/run.sh [--debug]
 
 set -e
@@ -10,7 +10,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 cd "$PROJECT_ROOT"
 
 echo "========================================"
-echo "  AdRename 执行脚本 ($(uname -s))"
+echo "  FlowRename 执行脚本 ($(uname -s))"
 echo "========================================"
 echo ""
 

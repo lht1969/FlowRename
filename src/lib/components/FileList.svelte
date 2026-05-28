@@ -1,4 +1,4 @@
-<!-- AdRename - FileList 组件（中间文件列表 - 增强版） -->
+<!-- FlowRename - FileList 组件（中间文件列表 - 增强版） -->
 <script lang="ts">
 	import { filesStore, previewStore, loadingStore, statusMessageStore } from '$lib/stores/app';
 	import { scanDirectory, scanFiles, clearFiles } from '$lib/commands';

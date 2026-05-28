@@ -1,8 +1,8 @@
-# AdRename 环境安装脚本 - Windows
+# FlowRename 环境安装脚本 - Windows
 # 使用方式: .\scripts\install-deps.ps1
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  AdRename 环境安装 (Windows)" -ForegroundColor Cyan
+Write-Host "  FlowRename 环境安装 (Windows)" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

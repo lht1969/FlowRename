@@ -1,4 +1,4 @@
-// AdRename - TypeScript type definitions for Tauri IPC
+// FlowRename - TypeScript type definitions for Tauri IPC
 // These types mirror the Rust structs for type-safe communication
 
 /** File item returned from scan_directory command */

@@ -1,4 +1,4 @@
-<!-- AdRename - TagPanel 标签面板组件
+<!-- FlowRename - TagPanel 标签面板组件
   可复用的标签面板，支持 Tab 页签切换四类标签：基本/图片/视频/音频
   视频/音频标签仅当文件列表中存在对应文件类型时显示 -->
 <script lang="ts">

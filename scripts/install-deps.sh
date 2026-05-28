@@ -1,11 +1,11 @@
 #!/bin/bash
-# AdRename 环境安装脚本 - Linux/macOS
+# FlowRename 环境安装脚本 - Linux/macOS
 # 使用方式: ./scripts/install-deps.sh
 
 set -e
 
 echo "========================================"
-echo "  AdRename 环境安装 ($(uname -s))"
+echo "  FlowRename 环境安装 ($(uname -s))"
 echo "========================================"
 echo ""
 

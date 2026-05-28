@@ -1,4 +1,4 @@
-// AdRename - Tauri IPC command wrappers
+// FlowRename - Tauri IPC command wrappers
 // Provides type-safe access to all backend Tauri commands
 
 import { invoke } from "@tauri-apps/api/core";

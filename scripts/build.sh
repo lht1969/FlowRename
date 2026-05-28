@@ -1,5 +1,5 @@
 #!/bin/bash
-# AdRename 构建脚本 - Linux/macOS
+# FlowRename 构建脚本 - Linux/macOS
 # 使用方式: ./scripts/build.sh [dev|build|release]
 
 set -e
@@ -10,7 +10,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 cd "$PROJECT_ROOT"
 
 echo "========================================"
-echo "  AdRename 构建脚本 ($(uname -s))"
+echo "  FlowRename 构建脚本 ($(uname -s))"
 echo "========================================"
 echo ""
 

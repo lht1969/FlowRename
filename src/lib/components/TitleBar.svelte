@@ -62,7 +62,7 @@
 				<path d="M2 4h12v2H2V4zm0 3h8v2H2V7zm0 3h10v2H2v-2z" />
 			</svg>
 		</div>
-		<span class="text-sm font-semibold tracking-wide opacity-80">AdRename</span>
+		<span class="text-sm font-semibold tracking-wide opacity-80">FlowRename</span>
 		<span class="text-xs opacity-55 ml-1">v1.0</span>
 	</div>
 

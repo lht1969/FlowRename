@@ -1,4 +1,4 @@
-<!-- AdRename - Main Page (Three-Column Layout) -->
+<!-- FlowRename - Main Page (Three-Column Layout) -->
 <script lang="ts">
 	import TitleBar from '$lib/components/TitleBar.svelte';
 	import StatusBar from '$lib/components/StatusBar.svelte';

@@ -1,4 +1,4 @@
-<!-- AdRename - NewNameMethodEditor 新名称方法配置编辑器 -->
+<!-- FlowRename - NewNameMethodEditor 新名称方法配置编辑器 -->
 <script lang="ts">
 	import type { NewNameConfig } from '$lib/types';
 	import TagPanel from '$lib/components/TagPanel.svelte';

@@ -1,4 +1,4 @@
-<!-- AdRename - ControlPanel 组件（右侧控制面板 - 含撤销与进度反馈） -->
+<!-- FlowRename - ControlPanel 组件（右侧控制面板 - 含撤销与进度反馈） -->
 <script lang="ts">
 	import {
 		filesStore,

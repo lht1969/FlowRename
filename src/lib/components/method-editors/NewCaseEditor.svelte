@@ -1,4 +1,4 @@
-<!-- AdRename - NewCaseMethodEditor 大小写方法配置编辑器 -->
+<!-- FlowRename - NewCaseMethodEditor 大小写方法配置编辑器 -->
 <script lang="ts">
 	import type { NewCaseConfig } from '$lib/types';
 

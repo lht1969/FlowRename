@@ -1,4 +1,4 @@
-# AdRename 构建脚本 - Windows
+# FlowRename 构建脚本 - Windows
 # 使用方式: .\scripts\build.ps1 [dev|build|release]
 
 param(
@@ -13,7 +13,7 @@ $ProjectRoot = Split-Path -Parent $ScriptDir
 Set-Location $ProjectRoot
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  AdRename 构建脚本 (Windows)" -ForegroundColor Cyan
+Write-Host "  FlowRename 构建脚本 (Windows)" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

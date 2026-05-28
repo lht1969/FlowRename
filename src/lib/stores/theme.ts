@@ -1,4 +1,4 @@
-// AdRename - Theme store with persistence
+// FlowRename - Theme store with persistence
 // Manages dark/light theme switching with localStorage persistence
 
 import { writable } from "svelte/store";

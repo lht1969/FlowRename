@@ -1,4 +1,4 @@
-// Models module - Core data structures for AdRename
+// Models module - Core data structures for FlowRename
 // This module defines all data types used throughout the application
 
 pub mod file_item;

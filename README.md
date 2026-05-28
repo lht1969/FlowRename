@@ -1,6 +1,6 @@
-# AdRename - 批量文件重命名工具
+# FlowRename - 批量文件重命名工具
 
-AdRename 是一款功能强大的跨平台批量文件重命名工具，支持 Windows、Linux 和 macOS 三大操作系统。
+FlowRename 是一款功能强大的跨平台批量文件重命名工具，支持 Windows、Linux 和 macOS 三大操作系统。
 
 ## 目录
 
@@ -379,9 +379,9 @@ src-tauri/target/release/bundle/
 
 | 操作系统 | 可执行文件位置 |
 |----------|----------------|
-| Windows | `src-tauri/target/release/bundle/exe/AdRename.exe` |
-| Linux | `src-tauri/target/release/bundle/appimage/AdRename` |
-| macOS | `src-tauri/target/release/bundle/app/AdRename.app/Contents/MacOS/AdRename` |
+| Windows | `src-tauri/target/release/bundle/exe/FlowRename.exe` |
+| Linux | `src-tauri/target/release/bundle/appimage/FlowRename` |
+| macOS | `src-tauri/target/release/bundle/app/FlowRename.app/Contents/MacOS/FlowRename` |
 
 ### NPM 脚本命令
 

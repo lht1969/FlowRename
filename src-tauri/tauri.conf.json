@@ -5,7 +5,7 @@
   "identifier": "com.flowrename.app",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:1420",
+    "devUrl": "http://localhost:5173",
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build"
   },
@@ -48,6 +48,9 @@
       "icons/Square284x284Logo.png",
       "icons/Square310x310Logo.png"
     ],
+    "resources": {
+      "icons": "icons"
+    },
     "windows": {
       "webviewInstallMode": {
         "type": "downloadBootstrapper"

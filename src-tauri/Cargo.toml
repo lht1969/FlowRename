@@ -32,6 +32,9 @@ mp4parse = { workspace = true }
 # App directories (data, config, cache)
 dirs = "5"
 
+# Image processing for window icon
+image = { version = "0.25", default-features = false, features = ["png"] }
+
 # Windows API for Chinese character sorting (StrCmpLogicalW / CompareStringEx)
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.58", features = ["Win32_Globalization"] }

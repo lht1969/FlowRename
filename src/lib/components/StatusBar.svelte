@@ -28,6 +28,7 @@
 				<span class="text-amber-600/80 dark:text-amber-300/90">⚠ {stats.conflicts} 冲突</span>
 			{/if}
 		{/if}
+		<span class="border-l border-[var(--color-surface-500)]/30 pl-3 ml-1">lht1969</span>
 	</div>
 </footer>
 

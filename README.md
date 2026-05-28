@@ -569,5 +569,5 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ## 获取帮助
 
-- 提交 Issue: https://github.com/<username>/rename_master/issues
+- 提交 Issue: https://github.com/lht1969/FlowRename/issues
 - 文档更新: 欢迎提交 PR 来完善本 README

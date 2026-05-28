@@ -46,6 +46,7 @@ pub fn run() {
         log::info!("Loaded {} undo entries from disk", loaded_history.len());
 
         tauri::Builder::default()
+            .plugin(tauri_plugin_shell::init())
             .plugin(tauri_plugin_dialog::init())
             .manage(AppState {
                 files: std::sync::Mutex::new(vec![]),
@@ -65,18 +66,41 @@ pub fn run() {
             ])
             .setup(|app| {
                 log::info!("FlowRename v1.0 initializing...");
-                
-                #[cfg(debug_assertions)]
+
+                // 设置窗口图标
                 {
                     use tauri::Manager;
                     if let Some(window) = app.get_webview_window("main") {
-                        window.open_devtools();
-                        log::info!("DevTools opened (debug mode)");
+                        #[cfg(debug_assertions)]
+                        {
+                            window.open_devtools();
+                            log::info!("DevTools opened (debug mode)");
+                        }
+
+                        // 加载并设置窗口图标
+                        let icon_path = app.path()
+                            .resolve("icons/32x32.png", tauri::path::BaseDirectory::Resource)
+                            .unwrap_or_else(|_| std::path::PathBuf::from("icons/32x32.png"));
+
+                        if let Ok(icon_bytes) = std::fs::read(&icon_path) {
+                            // 解析 PNG 获取尺寸和 RGBA 数据
+                            if let Ok(png_image) = image::load_from_memory_with_format(&icon_bytes, image::ImageFormat::Png) {
+                                let rgba = png_image.to_rgba8();
+                                let (width, height) = (rgba.width(), rgba.height());
+                                let raw_bytes: Vec<u8> = rgba.into_raw();
+
+                                let tauri_image = tauri::image::Image::new_owned(raw_bytes, width, height);
+                                let _ = window.set_icon(tauri_image);
+                                log::info!("Window icon set successfully ({}x{})", width, height);
+                            } else {
+                                log::warn!("Failed to decode PNG icon");
+                            }
+                        } else {
+                            log::warn!("Failed to read icon file: {:?}", icon_path);
+                        }
                     }
                 }
-                
-                let _ = app;
-                
+
                 log::info!("FlowRename ready");
                 Ok(())
             })

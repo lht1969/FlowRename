@@ -14,6 +14,7 @@
 	import TagPanel from '$lib/components/TagPanel.svelte';
 	import { detectFileCategories } from '$lib/stores/fileCategories';
 	import { onMount } from 'svelte';
+	import AboutDialog from '$lib/components/AboutDialog.svelte';
 
 	let files = $derived($filesStore);
 	let methods = $derived($methodsStore);
@@ -24,6 +25,9 @@
 
 	/** 撤销历史是否存在 */
 	let hasUndoHistory = $state(false);
+
+	/** 关于弹窗显示状态 */
+	let showAbout = $state(false);
 
 	/** 组件挂载时检查撤销历史状态（支持持久化撤销） */
 	onMount(async () => {
@@ -212,7 +216,25 @@
 			<TagPanel onInsertTag={() => {}} />
 		</div>
 	</div>
+
+	<!-- 关于按钮 -->
+	<div class="px-3 py-2 border-t border-surface-500/20">
+		<button
+			class="flex items-center justify-center gap-2 w-full px-4 py-2 text-xs font-medium rounded-lg
+				transition-all active:scale-[0.98] opacity-50 hover:opacity-80
+				bg-surface-500/5 hover:bg-surface-500/10"
+			onclick={() => showAbout = true}
+		>
+			<svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+				<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+			</svg>
+			关于...
+		</button>
+	</div>
 </aside>
+
+<!-- 关于弹窗 -->
+<AboutDialog bind:show={showAbout} />
 
 <style>
 	.adr-control-panel {

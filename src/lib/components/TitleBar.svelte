@@ -57,9 +57,10 @@
 	data-tauri-drag-region
 >
 	<div class="flex items-center gap-2">
-		<div class="adr-brand-icon w-5 h-5 rounded bg-blue-500 flex items-center justify-center">
-			<svg class="w-3 h-3 text-white" viewBox="0 0 16 16" fill="currentColor">
-				<path d="M2 4h12v2H2V4zm0 3h8v2H2V7zm0 3h10v2H2v-2z" />
+		<div class="adr-brand-icon w-5 h-5 rounded bg-blue-500 flex items-center justify-center overflow-hidden">
+			<svg class="w-5 h-5" viewBox="0 0 32 32" fill="none">
+				<rect width="32" height="32" rx="4" fill="#4285F4"/>
+				<text x="16" y="22" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="14" font-weight="bold">FR</text>
 			</svg>
 		</div>
 		<span class="text-sm font-semibold tracking-wide opacity-80">FlowRename</span>

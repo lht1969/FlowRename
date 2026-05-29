@@ -1,4 +1,4 @@
-# FlowRename 执行脚本 - Windows
+﻿# FlowRename 执行脚本 - Windows
 # 使用方式: .\scripts\run.ps1
 
 param(
@@ -18,8 +18,8 @@ Write-Host ""
 
 if ($Debug) {
     Write-Host "[INFO] 启动调试模式..." -ForegroundColor Yellow
-    npm run tauri dev -- --debug
+    npm run tauri dev --% --debug
 } else {
     Write-Host "[INFO] 启动应用..." -ForegroundColor Yellow
-    npm run tauri dev
+    npm run tauri dev --% --release
 }

@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:ui": "vitest --ui",
     "lint": "prettier --check . && eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "tauri": "tauri"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.3.1",

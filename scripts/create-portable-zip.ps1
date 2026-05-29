@@ -1,4 +1,4 @@
-$exe = "D:\projects\rename_master\target\release\flowrename.exe"
+﻿$exe = "D:\projects\rename_master\target\release\flowrename.exe"
 $zipDir = "D:\projects\rename_master\target\release\bundle\portable"
 $outputZip = Join-Path $zipDir "FlowRename_1.0.0_x64_portable.zip"
 

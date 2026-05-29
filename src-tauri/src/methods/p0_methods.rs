@@ -3,7 +3,7 @@ use regex::Regex;
 
 use crate::method_engine::traits::{Method, MethodContext};
 use crate::models::{
-    ApplyToOption, CaseType, MethodConfig, MethodType,
+    ApplyToOption, CaseType, CaseLocation, MethodConfig, MethodType,
     OccurrenceOption, RemovePosition, ReplaceConfig, AddConfig, RemoveConfig,
     NewCaseConfig, NewNameConfig, AddPosition,
 };
@@ -651,25 +651,32 @@ impl Method for NewCaseMethod {
         let apply_to = &self.config.apply_to;
 
         let apply_case = |s: &str| -> String {
-            match &self.config.new_case {
+            let transformed = match &self.config.new_case {
                 CaseType::Lower => s.to_lowercase(),
                 CaseType::Upper => s.to_uppercase(),
                 CaseType::Title => {
-                    let words: Vec<&str> = s.split_whitespace().collect();
-                    let title_words: Vec<String> = words.iter()
-                        .map(|word| {
-                            if word.is_empty() {
-                                String::new()
+                    // 按字母连续段拆分，支持空格、-、_ 等多种分隔符
+                    let mut result = String::new();
+                    let mut in_word = false;
+
+                    for c in s.chars() {
+                        if c.is_alphabetic() {
+                            if !in_word {
+                                // 单词首字母
+                                in_word = true;
+                                result.push_str(&c.to_uppercase().to_string());
                             } else {
-                                let mut chars = word.chars();
-                                match chars.next() {
-                                    Some(first) => first.to_uppercase().to_string() + chars.as_str(),
-                                    None => String::new(),
-                                }
+                                // 单词后续字母保持原样
+                                result.push(c);
                             }
-                        })
-                        .collect();
-                    title_words.join(" ")
+                        } else {
+                            // 非字母字符作为分隔符
+                            in_word = false;
+                            result.push(c);
+                        }
+                    }
+
+                    result
                 }
                 CaseType::Sentence => {
                     let mut result = String::new();
@@ -700,6 +707,72 @@ impl Method for NewCaseMethod {
                         })
                         .collect()
                 }
+            };
+
+            match &self.config.location {
+                CaseLocation::All => transformed,
+                CaseLocation::FirstLetter => {
+                    let mut chars = s.chars();
+                    match chars.next() {
+                        Some(first) => {
+                            let first_changed = match &self.config.new_case {
+                                CaseType::Upper | CaseType::Title | CaseType::Sentence => {
+                                    first.to_uppercase().to_string()
+                                }
+                                CaseType::Lower => first.to_lowercase().to_string(),
+                                CaseType::Inverted => {
+                                    if first.is_uppercase() {
+                                        first.to_lowercase().to_string()
+                                    } else if first.is_lowercase() {
+                                        first.to_uppercase().to_string()
+                                    } else {
+                                        first.to_string()
+                                    }
+                                }
+                            };
+                            let rest: String = chars.collect();
+                            format!("{}{}", first_changed, rest)
+                        }
+                        None => String::new(),
+                    }
+                }
+                CaseLocation::EveryWordFirstLetter => {
+                    let mut result = String::new();
+                    let mut in_word = false;
+
+                    for c in s.chars() {
+                        if c.is_alphabetic() {
+                            if !in_word {
+                                in_word = true;
+                                let changed = match &self.config.new_case {
+                                    CaseType::Upper | CaseType::Title | CaseType::Sentence => {
+                                        c.to_uppercase().to_string()
+                                    }
+                                    CaseType::Lower => c.to_lowercase().to_string(),
+                                    CaseType::Inverted => {
+                                        if c.is_uppercase() {
+                                            c.to_lowercase().to_string()
+                                        } else if c.is_lowercase() {
+                                            c.to_uppercase().to_string()
+                                        } else {
+                                            c.to_string()
+                                        }
+                                    }
+                                };
+                                result.push_str(&changed);
+                            } else {
+                                result.push(c);
+                            }
+                        } else {
+                            in_word = false;
+                            result.push(c);
+                        }
+                    }
+
+                    result
+                }
+                CaseLocation::ByPattern => transformed,
+                CaseLocation::ByPosition => transformed,
             }
         };
 

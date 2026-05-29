@@ -1,10 +1,8 @@
 <!-- FlowRename - TagPanel 标签面板组件
-  可复用的标签面板，支持 Tab 页签切换四类标签：基本/图片/视频/音频
-  视频/音频标签仅当文件列表中存在对应文件类型时显示 -->
+  可复用的标签面板，支持 Tab 页签切换六类标签：基本/序号/日期/图片/视频/音频
+  所有标签类别始终可见，方便用户提前规划重命名模板 -->
 <script lang="ts">
-	import { hasImageFiles, hasVideoFiles, hasAudioFiles } from '$lib/stores/fileCategories';
-
-	/** 标签类别定义 */
+	/** 标签类别定义（所有类别始终可见） */
 	const TAG_CATEGORIES = [
 		{
 			id: 'basic',
@@ -59,7 +57,7 @@
 		{
 			id: 'video',
 			label: '视频',
-			showStore: hasVideoFiles,
+			alwaysShow: true,
 			tags: [
 				{ tag: '<VidWidth>', label: '视频宽度', desc: '视频像素宽度' },
 				{ tag: '<VidHeight>', label: '视频高度', desc: '视频像素高度' },
@@ -77,7 +75,7 @@
 		{
 			id: 'audio',
 			label: '音频',
-			showStore: hasAudioFiles,
+			alwaysShow: true,
 			tags: [
 				{ tag: '<AudTitle>', label: '标题', desc: '音频曲目标题' },
 				{ tag: '<AudArtist>', label: '艺术家', desc: '艺术家/演唱者' },
@@ -103,19 +101,8 @@
 		onInsertTag: (tag: string) => void;
 	}>();
 
-	/** 可见的标签类别（根据文件类型动态过滤） */
-	const visibleCategories = $derived(
-		TAG_CATEGORIES.filter((cat) => {
-			if (cat.alwaysShow) return true;
-			if (cat.showStore) {
-				let visible = false;
-				const unsub = cat.showStore.subscribe((v) => (visible = v));
-				unsub();
-				return visible;
-			}
-			return true;
-		})
-	);
+	/** 可见的标签类别（所有类别始终可见） */
+	const visibleCategories = TAG_CATEGORIES;
 
 	/** 当前 Tab 的标签列表 */
 	let activeTags = $derived(

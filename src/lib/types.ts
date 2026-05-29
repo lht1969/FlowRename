@@ -136,7 +136,7 @@ export interface RemoveConfig {
 export interface NewCaseConfig {
   enabled: boolean;
   newCase: "Lower" | "Upper" | "Title" | "Sentence" | "Inverted";
-  location: "All" | "First";
+  location: "All" | "FirstLetter" | "EveryWordFirstLetter" | "ByPattern" | "ByPosition";
   applyTo: "Name" | "Extension" | "Both";
 }
 

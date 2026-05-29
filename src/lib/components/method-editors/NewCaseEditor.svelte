@@ -45,9 +45,9 @@
 				onclick={() => update({ location: 'All' })}
 			>所有单词</button>
 			<button
-				class="px-2 py-0.5 rounded text-[11px] transition-colors {config.location === 'First' ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-55 hover:opacity-75'}"
-				onclick={() => update({ location: 'First' })}
-			>仅首个</button>
+				class="px-2 py-0.5 rounded text-[11px] transition-colors {config.location === 'FirstLetter' ? 'bg-blue-500/30 text-blue-300' : 'bg-surface-500/10 opacity-55 hover:opacity-75'}"
+				onclick={() => update({ location: 'FirstLetter' })}
+			>仅首个单词</button>
 		</div>
 	</div>
 

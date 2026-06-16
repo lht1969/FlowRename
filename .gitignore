@@ -45,9 +45,7 @@ lerna-debug.log*
 coverage/
 .nyc_output/
 
-# Misc
-.cache
-.temp
-tests/
+# 仅忽略根目录的 tests/ 目录，不忽略子目录中的 tests/
+/tests/
 src-tauri/target/
 docs/

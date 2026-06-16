@@ -112,12 +112,12 @@ jobs:
         if: runner.os == 'macOS'
         shell: bash
         run: |
-          app_path=$(ls src-tauri/target/release/bundle/macos/*.app 2>/dev/null | head -1)
-          if [ -n "$app_path" ]; then
-            ditto -c -k --sequesterRsrc "$app_path" FlowRename.app.zip
+          app_path="src-tauri/target/release/bundle/macos/FlowRename.app"
+          if [ -d "$app_path" ]; then
+            ditto -c -k "$app_path" FlowRename.app.zip
             echo "Zipped .app bundle to FlowRename.app.zip"
           else
-            echo "No .app bundle found"
+            echo "No .app bundle found at $app_path"
           fi
 
       - name: List bundle artifacts

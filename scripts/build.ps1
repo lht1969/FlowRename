@@ -1,4 +1,4 @@
-﻿# FlowRename ﺗﺗﺛ۷ﺛﺧﺎﺝ - Windows
+# FlowRename ﺗﺗﺛ۷ﺛﺧﺎﺝ - Windows
 # ﮌﺗﺽﺣﺓﺛﮌﺛ: .\scripts\build.ps1 [dev|build|release]
 
 param(
@@ -23,8 +23,8 @@ switch ($Mode) {
         npm run tauri dev
     }
     "build" {
-        Write-Host "[INFO] ﻅﺑﺷﺷﺟ۹ﺓ۱ﺗﺗﺛ۷..." -ForegroundColor Yellow
-        npm run tauri build -- --bundles msi
+        Write-Host "[INFO] 执行开发构建..." -ForegroundColor Yellow
+        npm run tauri build
     }
     "release" {
         Write-Host "[INFO] ﻅﺑﺷﺷﺓ۱ﺎﺙﺗﺗﺛ۷..." -ForegroundColor Yellow

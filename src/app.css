@@ -39,8 +39,8 @@
 
   /* === Typography === */
   --adr-font-sans:
-    "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Inter Variable",
-    "Segoe UI", system-ui, sans-serif;
+    "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC",
+    "Inter Variable", "Segoe UI", system-ui, sans-serif;
   --adr-font-heading: "Noto Sans SC", "Inter Variable", system-ui, sans-serif;
   --adr-font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code", monospace;
 

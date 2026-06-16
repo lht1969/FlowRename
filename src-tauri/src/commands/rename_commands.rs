@@ -193,7 +193,7 @@ pub async fn execute_rename(
             }
             
             // Perform the actual rename
-            match fs::rename(&source_path, &target_path) {
+            match fs::rename(source_path, &target_path) {
                 Ok(_) => {
                     success_count += 1;
                     // Record undo operation

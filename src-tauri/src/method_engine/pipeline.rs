@@ -179,6 +179,12 @@ impl Default for Pipeline {
 ///   '/', '\\', '|' → '-'
 ///   '?'  → '_'
 ///   '*'  → '_'
+/// Sanitize filename to be compatible across Windows, macOS, and Linux.
+/// Characters invalid on Windows (`:`, `*`, `?`, `|`, `<`, `>`, `"`, `/`, `\`)
+/// are replaced with safe alternatives. This ensures renamed files can be
+/// moved between platforms without errors. These replacements are safe on
+/// all platforms even though `:`, `*`, `?`, `|` are technically valid on
+/// Unix — the trade-off is cross-platform portability.
 pub fn sanitize_filename(name: &str) -> String {
     name.chars()
         .map(|c| match c {

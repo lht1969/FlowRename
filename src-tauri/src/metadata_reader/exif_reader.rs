@@ -21,29 +21,21 @@ impl ExifReader {
             Err(_) => return None,
         };
 
-        let mut metadata = ImageMetadata::default();
-
-        // Extract standard EXIF fields
-        metadata.width = Self::get_u32(&exif, exif::Tag::PixelXDimension)
-            .or_else(|| Self::get_u32(&exif, exif::Tag::ImageWidth));
-
-        metadata.height = Self::get_u32(&exif, exif::Tag::PixelYDimension)
-            .or_else(|| Self::get_u32(&exif, exif::Tag::ImageLength));
-
-        metadata.make = Self::get_string(&exif, exif::Tag::Make);
-        metadata.model = Self::get_string(&exif, exif::Tag::Model);
-
-        metadata.datetime_original = Self::get_datetime(&exif, exif::Tag::DateTimeOriginal)
-            .or_else(|| Self::get_datetime(&exif, exif::Tag::DateTime));
-
-        metadata.iso_speed = Self::get_u32(&exif, exif::Tag::PhotographicSensitivity)
-            .or_else(|| Self::get_u32(&exif, exif::Tag::ISOSpeed));
-
-        metadata.f_number = Self::get_rational_as_f32(&exif, exif::Tag::FNumber);
-        metadata.focal_length = Self::get_rational_as_f32(&exif, exif::Tag::FocalLength);
-        metadata.exposure_time = Self::get_rational_as_f32(&exif, exif::Tag::ExposureTime);
-
-        Some(metadata)
+        Some(ImageMetadata {
+            width: Self::get_u32(&exif, exif::Tag::PixelXDimension)
+                .or_else(|| Self::get_u32(&exif, exif::Tag::ImageWidth)),
+            height: Self::get_u32(&exif, exif::Tag::PixelYDimension)
+                .or_else(|| Self::get_u32(&exif, exif::Tag::ImageLength)),
+            make: Self::get_string(&exif, exif::Tag::Make),
+            model: Self::get_string(&exif, exif::Tag::Model),
+            datetime_original: Self::get_datetime(&exif, exif::Tag::DateTimeOriginal)
+                .or_else(|| Self::get_datetime(&exif, exif::Tag::DateTime)),
+            iso_speed: Self::get_u32(&exif, exif::Tag::PhotographicSensitivity)
+                .or_else(|| Self::get_u32(&exif, exif::Tag::ISOSpeed)),
+            f_number: Self::get_rational_as_f32(&exif, exif::Tag::FNumber),
+            focal_length: Self::get_rational_as_f32(&exif, exif::Tag::FocalLength),
+            exposure_time: Self::get_rational_as_f32(&exif, exif::Tag::ExposureTime),
+        })
     }
 
     /// Get a string value from EXIF data

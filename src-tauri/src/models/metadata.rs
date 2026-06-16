@@ -7,6 +7,7 @@ use super::video_metadata::VideoMetadata;
 /// Holds both basic filesystem attributes and extended media-specific metadata
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[derive(Default)]
 pub struct FileMetadata {
     /// Basic filesystem attributes
     pub is_readonly: bool,
@@ -29,18 +30,6 @@ pub struct FileMetadata {
     pub video: Option<VideoMetadata>,
 }
 
-impl Default for FileMetadata {
-    fn default() -> Self {
-        Self {
-            is_readonly: false,
-            is_hidden: false,
-            is_system: false,
-            image: None,
-            audio: None,
-            video: None,
-        }
-    }
-}
 
 /// EXIF metadata extracted from image files (JPEG, TIFF, etc.)
 /// Uses standard EXIF field names for compatibility

@@ -19,7 +19,7 @@ impl VideoReader {
     fn extract_mp4_creation_time(data: &[u8]) -> Option<chrono::DateTime<chrono::Utc>> {
         const MVHD_BOX_TYPE: &[u8; 4] = b"mvhd";
         const MOOV_BOX_TYPE: &[u8; 4] = b"moov";
-        const MP4_EPOCH_OFFSET: i64 = -2082844800; // 1904-01-01 到 1970-01-01 的秒数差
+        const MP4_EPOCH_OFFSET: i64 = -2082844800; // Seconds between 1904-01-01 and 1970-01-01 (MP4 epoch → Unix epoch)
 
         let mut offset = 0;
         while offset < data.len() - 8 {
@@ -66,9 +66,7 @@ impl VideoReader {
                                 ]) as i64
                             };
 
-                            const BEIJING_OFFSET_SECS: i64 = 8 * 3600;
-                            let local_secs = creation_secs - BEIJING_OFFSET_SECS;
-                            let unix_secs = local_secs.checked_add(MP4_EPOCH_OFFSET)?;
+                            let unix_secs = creation_secs.checked_add(MP4_EPOCH_OFFSET)?;
                             if let Some(dt) = chrono::DateTime::from_timestamp(unix_secs, 0) {
                                 return Some(dt);
                             }
@@ -114,10 +112,10 @@ impl VideoReader {
             Err(_) => return None,
         };
 
-        let mut metadata = VideoMetadata::default();
-
-        // 提取视频创建日期 (从 mvhd box 的 creation_time)
-        metadata.creation_date = Self::extract_mp4_creation_time(&data);
+        let mut metadata = VideoMetadata {
+            creation_date: Self::extract_mp4_creation_time(&data),
+            ..Default::default()
+        };
 
         // 从全局 timescale 计算总时长
         if let Some(ref global_ts) = context.timescale {

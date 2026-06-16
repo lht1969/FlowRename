@@ -7,8 +7,10 @@ use super::FileMetadata;
 /// Processing status of a file during batch operations
 /// Tracks the lifecycle of each file through the rename pipeline
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Default)]
 pub enum FileStatus {
     /// Awaiting processing (initial state)
+    #[default]
     Pending,
 
     /// Preview has been generated successfully
@@ -30,11 +32,6 @@ pub enum FileStatus {
     Skipped,
 }
 
-impl Default for FileStatus {
-    fn default() -> Self {
-        Self::Pending
-    }
-}
 
 impl std::fmt::Display for FileStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

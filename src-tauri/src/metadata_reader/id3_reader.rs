@@ -35,31 +35,26 @@ impl Id3Reader {
             }
         };
 
-        let mut metadata = AudioMetadata::default();
-
-        metadata.title = tag.title().map(|s: &str| s.to_string());
-        metadata.artist = tag.artist().map(|s: &str| s.to_string());
-        metadata.album = tag.album().map(|s: &str| s.to_string());
-        metadata.year = tag.year().map(|y: i32| y as u16);
-        metadata.track_number = tag.track().map(|t| t as u16);
-        metadata.genre = tag.genre().map(|s: &str| s.to_string());
-
-        // Try to get duration from the audio file
-        metadata.duration = Self::get_duration_mp3(path);
-        metadata.bitrate = Self::get_bitrate_mp3(path);
-
-        Some(metadata)
+        Some(AudioMetadata {
+            title: tag.title().map(|s: &str| s.to_string()),
+            artist: tag.artist().map(|s: &str| s.to_string()),
+            album: tag.album().map(|s: &str| s.to_string()),
+            year: tag.year().map(|y: i32| y as u16),
+            track_number: tag.track().map(|t| t as u16),
+            genre: tag.genre().map(|s: &str| s.to_string()),
+            duration: Self::get_duration_mp3(path),
+            bitrate: Self::get_bitrate_mp3(path),
+            ..Default::default()
+        })
     }
 
     /// Extract basic audio info when no ID3 tags are present
     fn extract_basic_audio_info(path: &Path) -> Option<AudioMetadata> {
-        let mut metadata = AudioMetadata::default();
-        metadata.duration = Self::get_duration_mp3(path);
-        metadata.bitrate = Self::get_bitrate_mp3(path);
+        let duration = Self::get_duration_mp3(path);
+        let bitrate = Self::get_bitrate_mp3(path);
 
-        // Only return Some if we got at least some useful info
-        if metadata.duration.is_some() || metadata.bitrate.is_some() {
-            Some(metadata)
+        if duration.is_some() || bitrate.is_some() {
+            Some(AudioMetadata { duration, bitrate, ..Default::default() })
         } else {
             None
         }

@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 /// Apply scope for renaming operations
 /// Determines which part(s) of the filename the method affects
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Default)]
 pub enum ApplyToOption {
     /// Apply only to the name part (before the extension)
     Name,
@@ -11,14 +12,10 @@ pub enum ApplyToOption {
     Extension,
 
     /// Apply to both name and extension
+    #[default]
     Both,
 }
 
-impl Default for ApplyToOption {
-    fn default() -> Self {
-        Self::Both
-    }
-}
 
 impl std::fmt::Display for ApplyToOption {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

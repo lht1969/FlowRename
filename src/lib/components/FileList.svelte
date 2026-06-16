@@ -5,6 +5,7 @@
 	import { currentDirStore, recursiveStore, extensionFilterStore } from '$lib/stores/app';
 	import { detectFileCategories } from '$lib/stores/fileCategories';
 	import { compareFileName } from '$lib/utils/sort';
+	import { onMount } from 'svelte';
 	import type { FileItem, FilePreviewItem } from '$lib/types';
 
 	let files = $derived($filesStore);
@@ -23,6 +24,29 @@
 
 	/** 拖放状态 */
 	let isDragOver = $state(false);
+
+	/** 设置 Tauri 拖放事件监听 */
+	onMount(async () => {
+		try {
+			const { getCurrentWindow } = await import('@tauri-apps/api/window');
+			const appWindow = getCurrentWindow();
+			await appWindow.onDragDropEvent((event) => {
+				const ev = event.payload;
+				if (ev.type === 'enter' || ev.type === 'over') {
+					isDragOver = true;
+				} else if (ev.type === 'leave') {
+					isDragOver = false;
+				} else if (ev.type === 'drop') {
+					isDragOver = false;
+					if (ev.paths.length > 0) {
+						scanSelectedFiles(ev.paths);
+					}
+				}
+			});
+		} catch (e) {
+			console.warn('拖放事件监听不可用:', e);
+		}
+	});
 
 	/** 构建预览名称映射 */
 	let previewMap = $derived(

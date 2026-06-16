@@ -5,11 +5,13 @@
 
 	let showThemeMenu = $state(false);
 	let isMaximized = $state(false);
+	let isMacOS = $state(false);
 	let appWindow: any = null;
 
 	onMount(async () => {
 		const { getCurrentWindow } = await import('@tauri-apps/api/window');
 		appWindow = getCurrentWindow();
+		isMacOS = navigator.platform.toLowerCase().includes('mac');
 		await checkMaximized();
 	});
 
@@ -56,6 +58,37 @@
 	style="z-index: var(--adr-z-header);"
 	data-tauri-drag-region
 >
+	{#if isMacOS}
+		<div class="flex items-center gap-2 mac-traffic-lights">
+			<button
+				class="traffic-light traffic-light-close"
+				onclick={handleClose}
+				title="关闭"
+			>
+				<svg class="w-2.5 h-2.5" viewBox="0 0 12 12" fill="currentColor">
+					<path d="M9.5 2.5l-7 7M2.5 2.5l7 7"/>
+				</svg>
+			</button>
+			<button
+				class="traffic-light traffic-light-minimize"
+				onclick={handleMinimize}
+				title="最小化"
+			>
+				<svg class="w-2.5 h-2.5" viewBox="0 0 12 12" fill="currentColor">
+					<path d="M2.5 6h7"/>
+				</svg>
+			</button>
+			<button
+				class="traffic-light traffic-light-zoom"
+				onclick={handleToggleMaximize}
+				title={isMaximized ? '还原' : '最大化'}
+			>
+				<svg class="w-2.5 h-2.5" viewBox="0 0 12 12" fill="currentColor">
+					<path d="M3.5 3.5v5h5v-5z"/>
+				</svg>
+			</button>
+		</div>
+	{/if}
 	<div class="flex items-center gap-2">
 		<div class="adr-brand-icon w-5 h-5 rounded bg-blue-500 flex items-center justify-center overflow-hidden">
 			<svg class="w-5 h-5" viewBox="0 0 32 32" fill="none">
@@ -159,5 +192,55 @@
 
 	.active-theme-item {
 		background: rgba(128, 128, 128, 0.15);
+	}
+
+	.mac-traffic-lights {
+		gap: 6px;
+		padding-right: 8px;
+	}
+
+	.traffic-light {
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		border: none;
+		padding: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		-webkit-app-region: no-drag;
+		transition: filter 0.1s;
+	}
+
+	.traffic-light-close {
+		background: #ff5f57;
+		color: rgba(0, 0, 0, 0.3);
+	}
+
+	.traffic-light-close:hover {
+		filter: brightness(0.85);
+	}
+
+	.traffic-light-minimize {
+		background: #febc2e;
+		color: rgba(0, 0, 0, 0.3);
+	}
+
+	.traffic-light-minimize:hover {
+		filter: brightness(0.85);
+	}
+
+	.traffic-light-zoom {
+		background: #28c840;
+		color: rgba(0, 0, 0, 0.3);
+	}
+
+	.traffic-light-zoom:hover {
+		filter: brightness(0.85);
+	}
+
+	.traffic-light:hover svg {
+		opacity: 1;
 	}
 </style>

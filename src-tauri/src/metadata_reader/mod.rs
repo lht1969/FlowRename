@@ -55,6 +55,12 @@ impl MetadataReader {
             metadata.is_hidden = Self::is_hidden_windows(path);
         }
 
+        // Check for hidden files on Linux/macOS (dot-prefixed filenames)
+        #[cfg(not(target_os = "windows"))]
+        {
+            metadata.is_hidden = Self::is_hidden_unix(path);
+        }
+
         // Extract image EXIF metadata
         if Self::IMAGE_EXTENSIONS.contains(&extension.as_str()) {
             metadata.image = ExifReader::extract(path);
@@ -83,6 +89,15 @@ impl MetadataReader {
         } else {
             false
         }
+    }
+
+    /// Check if a file is hidden on Linux/macOS (dot-prefixed filename)
+    #[cfg(not(target_os = "windows"))]
+    fn is_hidden_unix(path: &Path) -> bool {
+        path.file_name()
+            .and_then(|n| n.to_str())
+            .map(|n| n.starts_with('.'))
+            .unwrap_or(false)
     }
 
     /// Check if a file extension is supported for metadata extraction

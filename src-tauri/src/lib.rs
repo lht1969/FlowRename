@@ -12,11 +12,14 @@ pub mod undo_manager;
 // Tauri Commands - IPC interface layer
 pub mod commands;
 
+#[cfg(not(test))]
 use commands::file_commands::AppState;
+#[cfg(not(test))]
 use undo_manager::UndoManager;
 
 /// Get the app data directory for storing persistent data
 /// On Windows, this typically resolves to: C:\Users\<user>\AppData\Roaming\com.flowrename.app
+#[cfg(not(test))]
 fn get_app_data_dir() -> std::path::PathBuf {
     // Use a standard app data directory
     let base = dirs::data_dir().unwrap_or_else(|| {
@@ -66,6 +69,14 @@ pub fn run() {
             ])
             .setup(|app| {
                 log::info!("FlowRename v1.0 initializing...");
+
+                // Set locale for CJK collation on Unix platforms
+                #[cfg(not(target_os = "windows"))]
+                {
+                    let locale_cstr = std::ffi::CString::new("").unwrap();
+                    unsafe { libc::setlocale(libc::LC_COLLATE, locale_cstr.as_ptr()); }
+                    log::info!("LC_COLLATE set from environment for CJK sorting");
+                }
 
                 // 设置窗口图标
                 {

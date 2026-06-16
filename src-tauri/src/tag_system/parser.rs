@@ -56,14 +56,14 @@ impl TagParser {
     }
 
     /// Extract content between angle brackets
-    fn extract_tag_content<'a, I>(&self, chars: &mut std::iter::Peekable<I>) -> Option<String>
+    fn extract_tag_content<I>(&self, chars: &mut std::iter::Peekable<I>) -> Option<String>
     where
         I: Iterator<Item = char>,
     {
         let mut content = String::new();
         let mut depth = 1;  // We've already consumed the opening '<'
 
-        while let Some(c) = chars.next() {
+        for c in chars.by_ref() {
             match c {
                 '<' => {
                     depth += 1;

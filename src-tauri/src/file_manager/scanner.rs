@@ -17,7 +17,7 @@ impl FileManager {
     /// * `paths` - List of file or directory paths to load
     /// * `recursive` - Whether to scan directories recursively (true) or only top-level (false)
     /// * `extensions_filter` - Optional filter to only include files with certain extensions (e.g., vec!["jpg", "png"])
-    ///                        Extensions should be lowercase without dots. Case-insensitive comparison.
+    ///   Extensions should be lowercase without dots. Case-insensitive comparison.
     ///
     /// # Returns
     /// A `Result` containing a vector of `FileItem` objects representing all found and valid files.
@@ -234,7 +234,7 @@ impl FileManager {
 
         // Extract extended metadata (EXIF/ID3) for supported file types
         let file_metadata =
-            if MetadataReader::is_supported_extension(&extension.trim_start_matches('.')) {
+            if MetadataReader::is_supported_extension(extension.trim_start_matches('.')) {
                 Some(MetadataReader::extract(path))
             } else {
                 None
@@ -266,7 +266,7 @@ impl FileManager {
 ///       * Linux/macOS: strcoll with system locale (requires zh_CN.UTF-8 for pinyin order)
 ///
 /// This is more compatible with Windows Explorer's sorting than standard lexicographic sort.
-pub fn sort_file_items(items: &mut Vec<FileItem>, field: &str, desc: bool) {
+pub fn sort_file_items(items: &mut [FileItem], field: &str, desc: bool) {
     match field {
         "name" => {
             items.sort_by(|a, b| {

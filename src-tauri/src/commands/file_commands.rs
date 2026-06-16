@@ -197,10 +197,7 @@ pub async fn clear_files(state: State<'_, AppState>) -> Result<(), String> {
         Err(e) => return Err(format!("Failed to clear files: {}", e)),
     }
     
-    match state.current_dir.lock() {
-        Ok(mut guard) => *guard = None,
-        Err(_) => {}
-    }
+    if let Ok(mut guard) = state.current_dir.lock() { *guard = None }
     
     log::info!("File list cleared");
     Ok(())

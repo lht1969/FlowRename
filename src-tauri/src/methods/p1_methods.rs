@@ -510,6 +510,7 @@ mod tests {
     #[test]
     fn test_list_method_direct() {
         let config = ListConfig {
+            enabled: true,
             names: vec!["alpha".to_string(), "beta".to_string(), "gamma".to_string()],
             overflow_behavior: ListOverflow::KeepOriginal,
             apply_to: ApplyToOption::Name,
@@ -525,6 +526,7 @@ mod tests {
     #[test]
     fn test_list_method_overflow_keep() {
         let config = ListConfig {
+            enabled: true,
             names: vec!["alpha".to_string()],
             overflow_behavior: ListOverflow::KeepOriginal,
             apply_to: ApplyToOption::Name,
@@ -538,6 +540,7 @@ mod tests {
     #[test]
     fn test_list_method_overflow_cycle() {
         let config = ListConfig {
+            enabled: true,
             names: vec!["alpha".to_string(), "beta".to_string()],
             overflow_behavior: ListOverflow::Cycle,
             apply_to: ApplyToOption::Name,
@@ -551,6 +554,7 @@ mod tests {
     #[test]
     fn test_move_method() {
         let config = MoveConfig {
+            enabled: true,
             from_start: 0,
             count: 3,
             to_position: 5,
@@ -568,6 +572,7 @@ mod tests {
     #[test]
     fn test_trim_method_whitespace() {
         let config = TrimConfig {
+            enabled: true,
             trim_start: String::new(),
             trim_end: String::new(),
             trim_whitespace: true,
@@ -582,6 +587,7 @@ mod tests {
     #[test]
     fn test_trim_method_chars() {
         let config = TrimConfig {
+            enabled: true,
             trim_start: "0123456789".to_string(),
             trim_end: "._- ".to_string(),
             trim_whitespace: false,
@@ -596,6 +602,7 @@ mod tests {
     #[test]
     fn test_renumber_method_prefix() {
         let config = RenumberConfig {
+            enabled: true,
             start: 1,
             step: 1,
             padding: 3,
@@ -614,6 +621,7 @@ mod tests {
     #[test]
     fn test_renumber_method_replace() {
         let config = RenumberConfig {
+            enabled: true,
             start: 10,
             step: 5,
             padding: 2,
@@ -623,13 +631,17 @@ mod tests {
         };
         let method = RenumberMethod::new(config);
 
-        let ctx = default_context(0);
+        let ctx = MethodContext {
+            original_ext: ".jpg".to_string(),
+            ..default_context(0)
+        };
         assert_eq!(method.apply("photo.jpg", &ctx).unwrap(), "10.jpg");
     }
 
     #[test]
     fn test_timestamp_method() {
         let config = TimestampConfig {
+            enabled: true,
             source: TimestampSource::Modified,
             format: "YYYY-MM-DD".to_string(),
             apply_to: ApplyToOption::Name,
@@ -637,10 +649,13 @@ mod tests {
         let method = TimestampMethod::new(config);
 
         // Without metadata, it uses current time
-        let ctx = default_context(0);
+        let ctx = MethodContext {
+            original_ext: ".jpg".to_string(),
+            ..default_context(0)
+        };
         let result = method.apply("photo.jpg", &ctx).unwrap();
         // Should end with .jpg and have a date-like format
-        assert!(result.ends_with(".jpg"));
+        assert!(result.ends_with(".jpg"), "Expected result to end with .jpg, got: {}", result);
         assert!(result.len() > 8); // At least "YYYY-MM-DD.jpg"
     }
 }

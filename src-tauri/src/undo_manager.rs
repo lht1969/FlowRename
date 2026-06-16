@@ -185,7 +185,7 @@ mod tests {
             id: format!("undo_test_{}", id_suffix),
             operations: (0..op_count)
                 .map(|i| UndoOperation {
-                    current_path: format!("C:/test/file_{}.txt", i),
+                    current_path: format!("test/file_{}.txt", i),
                     original_name: format!("original_{}.txt", i),
                 })
                 .collect(),

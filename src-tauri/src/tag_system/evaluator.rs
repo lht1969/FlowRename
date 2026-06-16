@@ -217,7 +217,7 @@ impl TagEvaluator {
 
     fn eval_sequence_inc(&self, modifiers: &[String], context: &MethodContext) -> Result<String> {
         // Modifiers: [padding_digits] or [padding_digits, start_value]
-        let padding = modifiers.get(0)
+        let padding = modifiers.first()
             .and_then(|s| s.parse::<usize>().ok())
             .unwrap_or(1);  // Default: no padding
         

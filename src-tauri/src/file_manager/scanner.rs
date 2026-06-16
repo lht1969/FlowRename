@@ -472,8 +472,26 @@ fn extract_number(chars: &[char], start_idx: &mut usize) -> u64 {
 mod tests {
     use super::*;
 
+    #[cfg(not(target_os = "windows"))]
+    use std::ffi::CString;
+    #[cfg(not(target_os = "windows"))]
+    use std::sync::Once;
+
+    #[cfg(not(target_os = "windows"))]
+    static LOCALE_INIT: Once = Once::new();
+
+    #[cfg(not(target_os = "windows"))]
+    fn ensure_collation_locale() {
+        LOCALE_INIT.call_once(|| {
+            let empty = CString::new("").unwrap();
+            unsafe { libc::setlocale(libc::LC_COLLATE, empty.as_ptr()); }
+        });
+    }
+
     #[test]
     fn test_natural_sort_chinese() {
+        #[cfg(not(target_os = "windows"))]
+        ensure_collation_locale();
         let mut names = vec!["安次得胜口马氏家谱序", "新建 DOCX 文档", "AI编程工具OpenCode"];
         names.sort_by(|a, b| compare_filename_natural(a, b));
         // ASCII 字母排在汉字前面; 汉字按平台区域设置排序:
@@ -495,6 +513,8 @@ mod tests {
 
     #[test]
     fn test_natural_sort_mixed() {
+        #[cfg(not(target_os = "windows"))]
+        ensure_collation_locale();
         let mut names = vec![
             "本项目的结果-AI编程工具OpenCode",
             "新建 DOCX 文档",

@@ -5,6 +5,10 @@ on:
     workflows: ["CI"]
     types: [completed]
 
+concurrency:
+  group: release-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: true
+
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
@@ -25,13 +29,12 @@ jobs:
         id: check-tag
         shell: bash
         run: |
-          git fetch --tags origin
-          TAG=$(git tag --points-at HEAD | grep '^v' | head -1)
-          if [ -z "$TAG" ]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-          else
+          HEAD_BRANCH="${{ github.event.workflow_run.head_branch }}"
+          if echo "$HEAD_BRANCH" | grep -qE '^v[0-9]'; then
             echo "skip=false" >> $GITHUB_OUTPUT
-            echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+            echo "version=${HEAD_BRANCH#v}" >> $GITHUB_OUTPUT
+          else
+            echo "skip=true" >> $GITHUB_OUTPUT
           fi
 
   build:

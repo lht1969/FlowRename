@@ -1,23 +1,42 @@
 name: Release
 
 on:
-  push:
-    tags: ["v*"]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
 
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
 
 jobs:
-  ci-check:
-    uses: ./.github/workflows/ci.yml
+  prepare:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.check-tag.outputs.skip }}
+      version: ${{ steps.check-tag.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Check for version tag
+        id: check-tag
+        shell: bash
+        run: |
+          git fetch --tags origin
+          TAG=$(git tag --points-at HEAD | grep '^v' | head -1)
+          if [ -z "$TAG" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+          fi
 
   build:
-    needs: [ci-check]
+    needs: [prepare]
+    if: ${{ needs.prepare.outputs.skip == 'false' }}
     strategy:
       fail-fast: false
       matrix:
@@ -33,7 +52,7 @@ jobs:
             target: aarch64-apple-darwin
             bundle-glob: |
               FlowRename.app.zip
-            tauri-bundles: -- --bundles app,zip
+            tauri-bundles: -- --bundles app
 
           - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
@@ -45,6 +64,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -113,7 +134,8 @@ jobs:
           if-no-files-found: warn
 
   create-release:
-    needs: [build]
+    needs: [build, prepare]
+    if: ${{ always() && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -126,9 +148,8 @@ jobs:
           pattern: bundle-*
           merge-multiple: true
 
-      - name: Extract tag version
-        shell: bash
-        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+      - name: Set version from prepare output
+        run: echo "VERSION=${{ needs.prepare.outputs.version }}" >> $GITHUB_ENV
 
       - name: Generate release notes
         shell: bash
@@ -153,8 +174,10 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ env.VERSION }}
           name: FlowRename v${{ env.VERSION }}
           body_path: RELEASE_NOTES.md
+          target_commitish: ${{ github.event.workflow_run.head_sha }}
           draft: true
           prerelease: false
           fail_on_unmatched_files: false

@@ -13,7 +13,11 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
+  ci-check:
+    uses: ./.github/workflows/ci.yml
+
   build:
+    needs: [ci-check]
     strategy:
       fail-fast: false
       matrix:

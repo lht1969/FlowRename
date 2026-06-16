@@ -74,7 +74,7 @@ function scheduleAutoPreview() {
       previewStore.set(result.files);
       statusMessageStore.set(
         `预览: ${result.changedCount} 个文件将重命名` +
-        (result.conflictCount > 0 ? `，${result.conflictCount} 个冲突` : "")
+          (result.conflictCount > 0 ? `，${result.conflictCount} 个冲突` : ""),
       );
     } catch (e) {
       statusMessageStore.set("预览异常: " + String(e));

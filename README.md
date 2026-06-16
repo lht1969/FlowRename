@@ -40,11 +40,11 @@ FlowRename 是一款功能强大的跨平台批量文件重命名工具，支持
 
 ### 通用环境
 
-| 组件 | 版本要求 | 说明 |
-|------|----------|------|
-| Node.js | >= 18.0 | 前端构建工具 |
-| npm | >= 9.0 | Node.js 包管理器 |
-| Rust | >= 1.70 | 后端编译环境 |
+| 组件    | 版本要求 | 说明             |
+| ------- | -------- | ---------------- |
+| Node.js | >= 18.0  | 前端构建工具     |
+| npm     | >= 9.0   | Node.js 包管理器 |
+| Rust    | >= 1.70  | 后端编译环境     |
 
 ### 各操作系统特定要求
 
@@ -81,11 +81,13 @@ cd rename_master
 ### 2. 安装依赖
 
 **Windows (PowerShell):**
+
 ```powershell
 .\scripts\install-deps.ps1
 ```
 
 **Linux/macOS (Bash):**
+
 ```bash
 chmod +x ./scripts/install-deps.sh
 ./scripts/install-deps.sh
@@ -94,11 +96,13 @@ chmod +x ./scripts/install-deps.sh
 ### 3. 开发模式运行
 
 **Windows:**
+
 ```powershell
 .\scripts\build.ps1 dev
 ```
 
 **Linux/macOS:**
+
 ```bash
 ./scripts/build.sh dev
 ```
@@ -106,11 +110,13 @@ chmod +x ./scripts/install-deps.sh
 ### 4. 构建发布版本
 
 **Windows:**
+
 ```powershell
 .\scripts\build.ps1 release
 ```
 
 **Linux/macOS:**
+
 ```bash
 ./scripts/build.sh release
 ```
@@ -126,6 +132,7 @@ chmod +x ./scripts/install-deps.sh
 1. **以管理员身份打开 PowerShell**
 
 2. **安装 Rust (如果未安装)**
+
    ```powershell
    irm https://rustup.rs | iex
    ```
@@ -138,11 +145,13 @@ chmod +x ./scripts/install-deps.sh
    - 安装时选择 "C++ 生成工具" 工作负载
 
 5. **运行安装脚本**
+
    ```powershell
    .\scripts\install-deps.ps1
    ```
 
 6. **构建项目**
+
    ```powershell
    # 开发模式
    .\scripts\build.ps1 dev
@@ -182,6 +191,7 @@ src-tauri/target/release/bundle/
 1. **安装系统依赖**
 
    **Ubuntu/Debian:**
+
    ```bash
    sudo apt-get update
    sudo apt-get install -y \
@@ -196,6 +206,7 @@ src-tauri/target/release/bundle/
    ```
 
    **Fedora:**
+
    ```bash
    sudo dnf install -y \
        webkit2gtk4.1-devel \
@@ -205,6 +216,7 @@ src-tauri/target/release/bundle/
    ```
 
    **Arch Linux:**
+
    ```bash
    sudo pacman -S --noconfirm \
        webkit2gtk-4.1 \
@@ -214,12 +226,14 @@ src-tauri/target/release/bundle/
    ```
 
 2. **安装 Rust**
+
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    source ~/.cargo/env
    ```
 
 3. **安装 Node.js**
+
    ```bash
    # 使用 nvm (推荐)
    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
@@ -228,12 +242,14 @@ src-tauri/target/release/bundle/
    ```
 
 4. **运行安装脚本**
+
    ```bash
    chmod +x ./scripts/install-deps.sh
    ./scripts/install-deps.sh
    ```
 
 5. **构建项目**
+
    ```bash
    # 开发模式
    ./scripts/build.sh dev
@@ -275,18 +291,22 @@ src-tauri/target/release/bundle/
 #### 方式一：使用 Bash 脚本 (推荐)
 
 1. **安装 Xcode 命令行工具**
+
    ```bash
    xcode-select --install
    ```
+
    在弹出的对话框中点击 "安装"
 
 2. **安装 Rust**
+
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    source ~/.cargo/env
    ```
 
 3. **安装 Node.js (推荐使用 nvm)**
+
    ```bash
    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
    export NVM_DIR="$HOME/.nvm"
@@ -296,12 +316,14 @@ src-tauri/target/release/bundle/
    ```
 
 4. **运行安装脚本**
+
    ```bash
    chmod +x ./scripts/install-deps.sh
    ./scripts/install-deps.sh
    ```
 
 5. **构建项目**
+
    ```bash
    # 开发模式
    ./scripts/build.sh dev
@@ -350,11 +372,13 @@ src-tauri/target/release/bundle/
 开发模式会启动热重载的前端开发服务器和 Tauri 应用:
 
 **Windows:**
+
 ```powershell
 .\scripts\build.ps1 dev
 ```
 
 **Linux/macOS:**
+
 ```bash
 ./scripts/build.sh dev
 ```
@@ -364,11 +388,13 @@ src-tauri/target/release/bundle/
 启动带有调试工具的开发版本:
 
 **Windows:**
+
 ```powershell
 .\scripts\run.ps1 -Debug
 ```
 
 **Linux/macOS:**
+
 ```bash
 ./scripts/run.sh --debug
 ```
@@ -377,11 +403,11 @@ src-tauri/target/release/bundle/
 
 构建完成后，可以直接运行生成的可执行文件:
 
-| 操作系统 | 可执行文件位置 |
-|----------|----------------|
-| Windows | `src-tauri/target/release/bundle/exe/FlowRename.exe` |
-| Linux | `src-tauri/target/release/bundle/appimage/FlowRename` |
-| macOS | `src-tauri/target/release/bundle/app/FlowRename.app/Contents/MacOS/FlowRename` |
+| 操作系统 | 可执行文件位置                                                                 |
+| -------- | ------------------------------------------------------------------------------ |
+| Windows  | `src-tauri/target/release/bundle/exe/FlowRename.exe`                           |
+| Linux    | `src-tauri/target/release/bundle/appimage/FlowRename`                          |
+| macOS    | `src-tauri/target/release/bundle/app/FlowRename.app/Contents/MacOS/FlowRename` |
 
 ### NPM 脚本命令
 
@@ -457,6 +483,7 @@ rename_master/
 **问题**: `error: failed to run custom build command for tauri-build`
 
 **解决方案**:
+
 ```bash
 # 更新 Rust 到最新版本
 rustup update
@@ -471,6 +498,7 @@ npm run tauri build
 **问题**: `WebView2 runtime not found`
 
 **解决方案**:
+
 - 下载并安装 [WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/)
 
 ### 3. Linux 下缺少 WebKit 库
@@ -478,6 +506,7 @@ npm run tauri build
 **问题**: `error: Failed to find webkit2gtk-4.1`
 
 **解决方案**:
+
 ```bash
 # Ubuntu/Debian
 sudo apt-get install libwebkit2gtk-4.1-dev
@@ -492,6 +521,7 @@ sudo dnf install webkit2gtk4.1-devel
 
 **解决方案**:
 在 `src-tauri/tauri.conf.json` 中暂时禁用签名:
+
 ```json
 {
   "bundle": {
@@ -507,6 +537,7 @@ sudo dnf install webkit2gtk4.1-devel
 **问题**: 生成的可执行文件被 Windows Defender 标记
 
 **解决方案**:
+
 - 这是因为应用未签名，属于正常现象
 - 可以临时关闭 Defender 进行测试
 - 或将 .exe 所在目录添加到排除项
@@ -516,6 +547,7 @@ sudo dnf install webkit2gtk4.1-devel
 **问题**: `error: could not compile .../out of memory`
 
 **解决方案**:
+
 ```bash
 # 减少并行编译数量
 export CARGO_BUILD_JOBS=2
@@ -529,6 +561,7 @@ npm run tauri build -- --jobs 2
 **问题**: `npm ERR! network timeout`
 
 **解决方案**:
+
 ```bash
 # 使用国内镜像
 npm config set registry https://registry.npmmirror.com
@@ -540,6 +573,7 @@ npm install
 **问题**: `cannot be loaded because running scripts is disabled`
 
 **解决方案**:
+
 ```powershell
 # 修改执行策略
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser

@@ -136,7 +136,12 @@ export interface RemoveConfig {
 export interface NewCaseConfig {
   enabled: boolean;
   newCase: "Lower" | "Upper" | "Title" | "Sentence" | "Inverted";
-  location: "All" | "FirstLetter" | "EveryWordFirstLetter" | "ByPattern" | "ByPosition";
+  location:
+    | "All"
+    | "FirstLetter"
+    | "EveryWordFirstLetter"
+    | "ByPattern"
+    | "ByPosition";
   applyTo: "Name" | "Extension" | "Both";
 }
 
@@ -186,7 +191,16 @@ export interface RenumberConfig {
 /** Timestamp method - rename based on file timestamps */
 export interface TimestampConfig {
   enabled: boolean;
-  source: "Created" | "Modified" | "Accessed" | "ImgDate" | "ImgTime" | "VidDate" | "VidTime" | "AudDate" | "AudTime";
+  source:
+    | "Created"
+    | "Modified"
+    | "Accessed"
+    | "ImgDate"
+    | "ImgTime"
+    | "VidDate"
+    | "VidTime"
+    | "AudDate"
+    | "AudTime";
   format: string;
   applyTo: "Name" | "Extension" | "Both";
 }

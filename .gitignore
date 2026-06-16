@@ -50,5 +50,4 @@ coverage/
 .temp
 tests/
 src-tauri/target/
-src-tauri/tests/
 docs/

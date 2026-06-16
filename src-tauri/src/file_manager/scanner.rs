@@ -404,11 +404,7 @@ fn compare_cjk_chars(a: char, b: char) -> std::cmp::Ordering {
     // 返回值为负数表示 a < b, 零表示 a == b, 正数表示 a > b
     let result = unsafe { libc::strcoll(a_cstr.as_ptr(), b_cstr.as_ptr()) };
 
-    match result.cmp(&0) {
-        std::cmp::Ordering::Less => std::cmp::Ordering::Less,
-        std::cmp::Ordering::Equal => std::cmp::Ordering::Equal,
-        std::cmp::Ordering::Greater => std::cmp::Ordering::Greater,
-    }
+    result.cmp(&0)
 }
 
 /// 自然排序文件名比较函数 (StrCmpLogicalW 风格, 支持平台特定汉字排序)

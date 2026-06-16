@@ -68,7 +68,7 @@ function isCJKChar(char: string): boolean {
  */
 function extractNumber(
   chars: string[],
-  startIdx: number
+  startIdx: number,
 ): { num: number; nextIdx: number } {
   let numStr = "";
   let idx = startIdx;

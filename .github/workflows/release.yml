@@ -70,15 +70,15 @@ jobs:
             artifact_name: windows
             bundle_path: target/release/bundle
             glob_pattern: |
-              *.msi
-              *.exe
+              **/*.msi
+              **/*.exe
 
           - os: macos-14
             target: aarch64-apple-darwin
             artifact_name: macos
             bundle_path: target/release/bundle/macos
             glob_pattern: |
-              *.app.zip
+              **/*.app.zip
             tauri_args: -- --bundles app
 
           - os: ubuntu-22.04
@@ -86,8 +86,8 @@ jobs:
             artifact_name: linux
             bundle_path: target/release/bundle
             glob_pattern: |
-              *.AppImage
-              *.deb
+              **/*.AppImage
+              **/*.deb
 
     runs-on: ${{ matrix.os }}
     steps:

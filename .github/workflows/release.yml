@@ -123,6 +123,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-release-
 
+      - name: Clean old bundles (avoid stale files from cache)
+        shell: bash
+        run: rm -rf target/release/bundle
+
       - name: Build Tauri app
         run: |
           npm run tauri build ${{ matrix.tauri_args }}

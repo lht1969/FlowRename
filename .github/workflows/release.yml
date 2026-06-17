@@ -5,12 +5,10 @@ on:
     workflows: ["CI"]
     types:
       - completed
-    branches:
-      - main
 
-# 防止多个 release 同时运行
+# 全局互斥：同一时间只允许一个 release 运行
 concurrency:
-  group: release-${{ github.event.workflow_run.head_branch }}
+  group: release-single
   cancel-in-progress: true
 
 env:
@@ -157,7 +155,7 @@ jobs:
         with:
           name: ${{ matrix.artifact_name }}-bundle
           path: ${{ matrix.bundle_path }}/${{ matrix.glob_pattern }}
-          if-no-files-found: error  # 改为 error，确保构建失败时不会继续
+          if-no-files-found: error
 
   create-release:
     needs: [check-and-prepare, build]
@@ -232,7 +230,7 @@ jobs:
           target_commitish: ${{ github.event.workflow_run.head_sha }}
           draft: true
           prerelease: false
-          fail_on_unmatched_files: true  # 改为 true，文件缺失时失败
+          fail_on_unmatched_files: true
           files: |
             ./artifacts/*.msi
             ./artifacts/*.exe

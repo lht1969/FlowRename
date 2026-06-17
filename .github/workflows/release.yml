@@ -244,8 +244,8 @@ jobs:
           prerelease: false
           fail_on_unmatched_files: true
           files: |
-            ./artifacts/*.msi
-            ./artifacts/*.exe
-            ./artifacts/*.app.zip
-            ./artifacts/*.AppImage
-            ./artifacts/*.deb
+            ./artifacts/**/*.msi
+            ./artifacts/**/*.exe
+            ./artifacts/**/*.app.zip
+            ./artifacts/**/*.AppImage
+            ./artifacts/**/*.deb

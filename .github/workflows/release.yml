@@ -70,8 +70,8 @@ jobs:
             artifact_name: windows
             bundle_path: target/release/bundle
             glob_pattern: |
-              **/*.msi
-              **/*.exe
+              msi/*.msi
+              nsis/*.exe
 
           - os: macos-14
             target: aarch64-apple-darwin

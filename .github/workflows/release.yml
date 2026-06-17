@@ -46,8 +46,8 @@ jobs:
             exit 0
           fi
 
-          # 方法2：通过 SHA 查找对应的 tag
-          TAG=$(git describe --exact-match "$SHA" 2>/dev/null || echo "")
+          # 方法2：通过 git tag --points-at 精准查找指向该 SHA 的标签
+          TAG=$(git tag --points-at "$SHA" | head -n 1 || echo "")
           if [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             VERSION="${TAG#v}"
             echo "should_release=true" >> $GITHUB_OUTPUT

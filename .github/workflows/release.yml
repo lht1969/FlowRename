@@ -68,7 +68,7 @@ jobs:
           - os: windows-2022
             target: x86_64-pc-windows-msvc
             artifact_name: windows
-            bundle_path: src-tauri/target/release/bundle
+            bundle_path: target/release/bundle
             glob_pattern: |
               *.msi
               *.exe
@@ -76,7 +76,7 @@ jobs:
           - os: macos-14
             target: aarch64-apple-darwin
             artifact_name: macos
-            bundle_path: src-tauri/target/release/bundle/macos
+            bundle_path: target/release/bundle/macos
             glob_pattern: |
               *.app.zip
             tauri_args: -- --bundles app
@@ -84,7 +84,7 @@ jobs:
           - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
             artifact_name: linux
-            bundle_path: src-tauri/target/release/bundle
+            bundle_path: target/release/bundle
             glob_pattern: |
               *.AppImage
               *.deb
@@ -126,7 +126,7 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            src-tauri/target
+            target
           key: ${{ runner.os }}-release-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-release-
@@ -140,11 +140,11 @@ jobs:
         shell: bash
         run: |
           APP_NAME="FlowRename"
-          APP_PATH="src-tauri/target/release/bundle/macos/${APP_NAME}.app"
+          APP_PATH="target/release/bundle/macos/${APP_NAME}.app"
 
           if [ -d "$APP_PATH" ]; then
             echo "📦 正在打包 macOS 应用..."
-            cd src-tauri/target/release/bundle/macos/
+            cd target/release/bundle/macos/
             ditto -c -k "${APP_NAME}.app" "${APP_NAME}.app.zip"
             cd -
             echo "✅ 打包完成: ${APP_NAME}.app.zip"

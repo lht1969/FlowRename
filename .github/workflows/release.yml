@@ -34,7 +34,7 @@ jobs:
         run: |
           # 从 CI 触发的分支名提取版本
           BRANCH="${{ github.event.workflow_run.head_branch }}"
-          
+
           # 检查是否是版本标签 (v1.0.0 格式)
           if [[ "$BRANCH" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             VERSION="${BRANCH#v}"
@@ -129,7 +129,7 @@ jobs:
         run: |
           APP_NAME="FlowRename"
           APP_PATH="src-tauri/target/release/bundle/macos/${APP_NAME}.app"
-          
+
           if [ -d "$APP_PATH" ]; then
             echo "📦 正在打包 macOS 应用..."
             cd src-tauri/target/release/bundle/macos/
@@ -171,7 +171,7 @@ jobs:
       - name: Download all bundle artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: *-bundle
+          pattern: "*-bundle"
           merge-multiple: true
           path: ./artifacts
 
@@ -214,10 +214,10 @@ jobs:
           - **macOS**: macOS 10.15+ (Catalina)，Apple Silicon
           - **Linux**: 支持 AppImage 或 DEB 的发行版
           EOF
-          
+
           # 替换环境变量
           sed -i "s/\${VERSION}/$VERSION/g" RELEASE_NOTES.md
-          
+
           echo "=== 发布说明 ==="
           cat RELEASE_NOTES.md
 

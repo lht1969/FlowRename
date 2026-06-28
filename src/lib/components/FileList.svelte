@@ -6,13 +6,12 @@
 	import { detectFileCategories } from '$lib/stores/fileCategories';
 	import { compareFileName } from '$lib/utils/sort';
 	import { onMount } from 'svelte';
-	import type { FileItem, FilePreviewItem } from '$lib/types';
+	import type { FilePreviewItem } from '$lib/types';
 
 	let files = $derived($filesStore);
 	let preview = $derived($previewStore);
 	let loading = $derived($loadingStore);
 	let currentDir = $derived($currentDirStore);
-	let recursive = $derived($recursiveStore);
 
 	/** 排序状态 */
 	let sortField = $state<'name' | 'size' | 'modified'>('name');
@@ -43,8 +42,8 @@
 					}
 				}
 			});
-		} catch (e) {
-			console.warn('拖放事件监听不可用:', e);
+		} catch {
+			// Tauri 环境未就绪时忽略
 		}
 	});
 
@@ -97,8 +96,8 @@
 				currentDirStore.set(selected);
 				await scanDir(selected);
 			}
-		} catch (e) {
-			console.warn('文件对话框不可用:', e);
+		} catch {
+			// Tauri 环境未就绪时忽略
 		}
 	}
 
@@ -138,8 +137,8 @@
 				currentDirStore.set(null);
 				await scanSelectedFiles(selected);
 			}
-		} catch (e) {
-			console.warn('文件对话框不可用:', e);
+		} catch {
+			// Tauri 环境未就绪时忽略
 		}
 	}
 

@@ -12,8 +12,8 @@
 	async function openGitHub() {
 		try {
 			await open(GITHUB_URL);
-		} catch (e) {
-			console.error('打开链接失败:', e);
+		} catch {
+			// 打开链接失败时静默处理
 		}
 	}
 

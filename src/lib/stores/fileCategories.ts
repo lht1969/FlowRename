@@ -2,7 +2,7 @@
 // 根据当前文件列表中文件的扩展名，自动检测是否包含图片/视频/音频文件
 // 用于控制标签面板中各类别标签的显示/隐藏
 
-import { writable, derived } from "svelte/store";
+import { writable } from "svelte/store";
 import type { FileItem } from "$lib/types";
 
 /** 文件扩展名分类常量 */

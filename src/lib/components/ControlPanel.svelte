@@ -2,7 +2,6 @@
 <script lang="ts">
 	import {
 		filesStore,
-		methodsStore,
 		previewStore,
 		loadingStore,
 		statusMessageStore,
@@ -16,8 +15,6 @@
 	import { onMount } from 'svelte';
 	import AboutDialog from '$lib/components/AboutDialog.svelte';
 
-	let files = $derived($filesStore);
-	let methods = $derived($methodsStore);
 	let preview = $derived($previewStore);
 	let loading = $derived($loadingStore);
 	let canExecute = $derived($canExecuteStore);

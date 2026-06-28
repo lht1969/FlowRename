@@ -106,7 +106,7 @@
 			const method = arr[index];
 			const typeKey = getMethodType(method);
 			if (typeKey) {
-				const config = (method as any)[typeKey];
+				const config = (method as Record<string, unknown>)[typeKey] as Record<string, unknown> | undefined;
 				if (config) {
 					config.enabled = checkbox.checked;
 				}
@@ -119,7 +119,7 @@
 	function isMethodEnabled(config: MethodConfig): boolean {
 		const typeKey = getMethodType(config);
 		if (!typeKey) return true;
-		const configData = (config as any)[typeKey];
+		const configData = (config as Record<string, unknown>)[typeKey] as Record<string, unknown> | undefined;
 		return configData?.enabled !== false;
 	}
 

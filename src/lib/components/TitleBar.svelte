@@ -6,6 +6,7 @@
 	let showThemeMenu = $state(false);
 	let isMaximized = $state(false);
 	let isMacOS = $state(false);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let appWindow: any = null;
 
 	onMount(async () => {

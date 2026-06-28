@@ -94,5 +94,5 @@ export default tseslint.config(
       "svelte/no-unused-svelte-ignore": "off",
       "svelte/prefer-writable-derived": "off",
     },
-  }
+  },
 );

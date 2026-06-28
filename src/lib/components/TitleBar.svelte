@@ -97,7 +97,7 @@
 			</svg>
 		</div>
 		<span class="text-sm font-semibold tracking-wide opacity-80">FlowRename</span>
-		<span class="text-xs opacity-55 ml-1">v1.0</span>
+		<span class="text-xs opacity-55 ml-1">v0.1.0</span>
 	</div>
 
 	<div class="flex items-center gap-1">

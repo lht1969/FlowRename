@@ -68,7 +68,7 @@ pub fn run() {
                 commands::rename_commands::get_undo_status,
             ])
             .setup(|app| {
-                log::info!("FlowRename v1.0 initializing...");
+                log::info!("FlowRename v0.1.0 initializing...");
 
                 // Set locale for CJK collation on Unix platforms
                 #[cfg(not(target_os = "windows"))]
@@ -121,6 +121,6 @@ pub fn run() {
     
     #[cfg(test)]
     {
-        println!("FlowRename v1.0 - Test mode (Tauri runtime disabled)");
+        println!("FlowRename v0.1.0 - Test mode (Tauri runtime disabled)");
     }
 }

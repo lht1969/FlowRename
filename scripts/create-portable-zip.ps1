@@ -1,6 +1,6 @@
 ﻿$exe = "D:\projects\rename_master\target\release\flowrename.exe"
 $zipDir = "D:\projects\rename_master\target\release\bundle\portable"
-$outputZip = Join-Path $zipDir "FlowRename_1.0.0_x64_portable.zip"
+$outputZip = Join-Path $zipDir "FlowRename_0.1.0_x64_portable.zip"
 
 if (-not (Test-Path $zipDir)) {
     New-Item -ItemType Directory -Path $zipDir -Force | Out-Null
@@ -15,7 +15,7 @@ New-Item -ItemType Directory -Path $staging -Force | Out-Null
 Copy-Item $exe $staging
 
 $readmeContent = @"
-FlowRename v1.0.0 - Portable Edition
+FlowRename v0.1.0 - Portable Edition
 ====================================
 
 This is the portable version of FlowRename.

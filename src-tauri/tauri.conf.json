@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "FlowRename v1.0",
+        "title": "FlowRename v0.1.0",
         "width": 1280,
         "height": 720,
         "minWidth": 960,
